@@ -8,15 +8,14 @@ package entity
  * @property playerName The name to be displayed for this player
  * @property score defines the sum of the rounds score of the active "Tauchen"
  * @property hasSpecialAction indicates whether the special move has been played.
- *
  * @property hand The list of cards in players hand
  * @property collectionStack The list of trio cards that player collects
  */
 
 class Player (
-    name : String,
-    score : Int,
-    hasSpecialAction : Boolean
+    val name : String,
+    var score : Int,
+    var hasSpecialAction : Boolean
 ) {
     var hand: MutableList<Card> = mutableListOf()
     var collectionStack: MutableList<Card> = mutableListOf()
