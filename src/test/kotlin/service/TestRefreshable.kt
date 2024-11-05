@@ -4,6 +4,12 @@ import entity.*
 import gui.Refreshable
 import service.*
 
+/**
+ * [Refreshable] implementation that refreshes nothing, but remembers
+ * if a refresh method has been called (since last [reset])
+ *
+ * @param rootService The root service to which this service belongs
+ */
 class TestRefreshable(val rootService: RootService) : Refreshable{
 
     var refreshAfterStartGame : Boolean =false
@@ -30,8 +36,9 @@ class TestRefreshable(val rootService: RootService) : Refreshable{
     var refreshAfterEndGame : Boolean =false
         private set
 
-
-
+    /**
+     * resets all *Called properties to false
+     */
     fun reset(){
         refreshAfterStartTurn= false
 
