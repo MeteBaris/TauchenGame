@@ -87,7 +87,7 @@ class PlayerActionServiceTest {
         game.playStack.addAll(listOf(card1, card2))
         game.players[0].hand.add(cardToPlay)
 
-        playerActionService.trioFormedHandling(cardToPlay)
+        playerActionService.playCard(cardToPlay)
 
         assertTrue(game.players[0].collectionStack.containsAll(listOf(card1, card2, cardToPlay)))
         assertEquals(5, game.players[0].score)

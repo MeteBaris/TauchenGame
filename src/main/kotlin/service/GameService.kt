@@ -15,17 +15,19 @@ class GameService(
      * (It will be suitable after GUI implementation)*/
     fun startGame(playerNames: List<String>) {
 
-        val game = TauchenGame(mutableListOf(Player("Alice",0,true), Player("Bob",0,true)))
+        val game = TauchenGame(mutableListOf(Player(playerNames[0],0,true), Player(playerNames[1],0,true)))
 
         //name will be  written after GUI service
         //for random first player
         game.players.shuffle()
 
-        game.drawStack = rootService.cardService.createDrawStack().toMutableList()
+
+
         game.players[0].hand = rootService.cardService.dealCards()
         game.players[1].hand = rootService.cardService.dealCards()
         game.players[0].collectionStack = rootService.cardService.createCollectionStack().toMutableList()
         game.players[1].collectionStack = rootService.cardService.createCollectionStack().toMutableList()
+        game.drawStack = rootService.cardService.createDrawStack().toMutableList()
 
         rootService.currentGame = game
 
@@ -69,6 +71,8 @@ class GameService(
                         game.players[0].score + " score."
             )
         }
+        onAllRefreshables {  }
+        rootService.currentGame =null
     }
     /**The startTurn() starts automatically after startGame. It will be better after GUI implementation */
     fun startTurn() {
@@ -87,7 +91,6 @@ class GameService(
 
         if (game.drawStack.isNotEmpty()) {
             game.isPlayerOneActive = !game.isPlayerOneActive
-            startTurn()
         } else {
             endGame()
         }

@@ -1,6 +1,6 @@
-import gui.SopraApplication
+import gui.TauchenApplication
 
 fun main() {
-    SopraApplication().show()
+    TauchenApplication().show()
     println("Application ended. Goodbye")
 }

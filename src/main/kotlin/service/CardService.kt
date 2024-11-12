@@ -12,6 +12,8 @@ import entity.*
 class CardService(private val rootService: RootService) :
     AbstractRefreshingService() {
 
+    private var deck: MutableList<Card> = createDeck().toMutableList()
+
 /**createDeck() function creates a shuffled deck for the game*/
     internal fun createDeck(): List<Card> {
         return CardSuit.values().flatMap { suit ->
@@ -20,18 +22,11 @@ class CardService(private val rootService: RootService) :
     }
 
     /**it creates hands for players in order*/
+    //???????
     internal fun dealCards(): MutableList<Card> {
-        val game = rootService.currentGame
-        val deck = createDeck().toMutableList()
-        return deck.extract(5)
-    }
-
-    /**help function for extract 5 card on the drawStack for deals card*/
-     private fun <T> MutableList<T>.extract(n: Int): MutableList<T> {
-        val deck =createDeck().toMutableList()
-        val extractedElements = this.take(n).toMutableList() // Convert to MutableList
-        this.subList(0, n).clear() // Remove these elements from the original list
-        return extractedElements
+        val hand = deck.takeLast(5).toMutableList()
+        deck = deck.dropLast(5).toMutableList()
+        return hand
     }
 
     /**it creates a Collection stack from trios. Score will be calculated with this Collection stack*/
@@ -42,9 +37,7 @@ class CardService(private val rootService: RootService) :
 
     /** It creates draw stack after dealing cards (I hope) (??? -> does it work?)*/
     fun createDrawStack(): List<Card> {
-        val game = rootService.currentGame
-
-        return game!!.drawStack
+        return deck
     }
     /** It creates discard stack after dealing cards (I hope) */
     fun createDiscardStack(): List<Card> {

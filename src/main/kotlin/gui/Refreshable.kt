@@ -13,13 +13,15 @@ interface Refreshable {
 
     fun refreshAfterPlayCard() {}
 
-    fun refreshAfterDrawCard(card: Card)
+    fun refreshAfterDrawCard(card: Card){}
 
     fun refreshAfterSwapCard() {}
 
     fun refreshAfterDiscardCard(){}
 
     fun refreshAfterEndGame(winner : Player){}
+
+    fun refreshAfterPlayAgain(){}
 
 
 }
