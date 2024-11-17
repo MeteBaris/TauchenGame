@@ -11,10 +11,9 @@ import entity.*
 
 class CardService(private val rootService: RootService) :
     AbstractRefreshingService() {
-
     private var deck: MutableList<Card> = createDeck().toMutableList()
-
 /**createDeck() function creates a shuffled deck for the game*/
+// shuffled() removed
     internal fun createDeck(): List<Card> {
         return CardSuit.values().flatMap { suit ->
             CardValue.values().map { value -> Card(suit, value) }

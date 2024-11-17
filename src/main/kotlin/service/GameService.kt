@@ -21,8 +21,6 @@ class GameService(
         //for random first player
         game.players.shuffle()
 
-
-
         game.players[0].hand = rootService.cardService.dealCards()
         game.players[1].hand = rootService.cardService.dealCards()
         game.players[0].collectionStack = rootService.cardService.createCollectionStack().toMutableList()
@@ -34,11 +32,10 @@ class GameService(
         onAllRefreshables {
             refreshAfterStartGame()
         }
-        startTurn()
     }
 
     /**The endGame() method ends the current game and calculates the players final scores*/
-    fun endGame(): Unit {
+    fun endGame() {
         val game = rootService.currentGame
         if (game!!.players[0].score > game.players[1].score) {
             println(

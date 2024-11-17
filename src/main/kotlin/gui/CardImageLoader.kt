@@ -11,40 +11,6 @@ private const val IMG_HEIGHT = 200
 private const val IMG_WIDTH = 130
 
 
-class CardImageLoader {
-    fun frontImageFor(suit: CardSuit, value: CardValue) =
-        getImageByCoordinates(value.column, suit.row)
-
-
-    /**
-     * Provides a blank (white) card
-     */
-    val blankImage : ImageVisual get() = getImageByCoordinates(0, 4)
-
-    /**
-     * Provides the back side image of the card deck
-     */
-    val backImage: ImageVisual get() = getImageByCoordinates(2, 4)
-
-
-
-    /**
-     * retrieves from the full raster image [CARDS_FILE] the corresponding sub-image
-     * for the given column [x] and row [y]
-     *
-     * @param x column in the raster image, starting at 0
-     * @param y row in the raster image, starting at 0
-     *
-     */
-    private fun getImageByCoordinates (x: Int, y: Int) = ImageVisual(
-        CARDS_FILE,
-        IMG_WIDTH,
-        IMG_HEIGHT,
-        x * IMG_WIDTH,
-        y * IMG_HEIGHT,
-    )
-
-}
 /**
  * As the [CARDS_FILE] does not have the same ordering of suits
  * as they are in [CardSuit], this extension property provides

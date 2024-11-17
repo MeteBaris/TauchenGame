@@ -24,6 +24,7 @@ class PlayerActionService(private val rootService: RootService) :
         checkNotNull(game) { "No game is currently active" }
         val currentPlayer: Player = if (game.isPlayerOneActive) {
             game.players[0]
+
         } else
             game.players[1]
 
@@ -106,12 +107,12 @@ class PlayerActionService(private val rootService: RootService) :
     /**The drawCard() method allows a player to draw a card from the draw pile.
      * This card is added to their hand.
      * */
-//cekilen kart uyumlu ise oynanmak zorunda, yoksa elde kaliyor
-    //eger kart yoksa oyun bitmeli endGame() olmali
-    fun drawCard(card: Card): Unit {
+//
+    fun drawCard() {
         val game = rootService.currentGame
 
         checkNotNull(game) { "No game currently running." }
+        print(game.drawStack.size)
         val currentPlayer =
             if (game.isPlayerOneActive) game.players[0]
             else game.players[1]
@@ -125,13 +126,13 @@ class PlayerActionService(private val rootService: RootService) :
         currentPlayer.hand.add(drawnCard)
 
         onAllRefreshables {
-            refreshAfterDrawCard(card)
+            refreshAfterDrawCard()
         }
     }
 
     /**this is a special action. After this the property hasSpecialAction property of player will turn false*/
     //???????
-    fun swapCard(card: Card) {
+    /* fun swapCard(card: Card) {
         val game = rootService.currentGame
         checkNotNull(game) { "No game currently running." }
         val currentPlayer =
@@ -139,6 +140,9 @@ class PlayerActionService(private val rootService: RootService) :
             else game.players[1]
 
         val replacementCard = if (game.playStack.isNotEmpty() && game.playStack.size == 2) {
+            game.playStack.removeFirst()
+        }
+        else if(game.playStack.isNotEmpty() && game.playStack.size == 1){
             game.playStack.removeFirst()
         }
         else {
@@ -152,6 +156,48 @@ class PlayerActionService(private val rootService: RootService) :
             refreshAfterSwapCard()
         }
 
+    }
+
+     */
+
+
+    fun swapCard(cardTaken: Card, cardPlaced: Card){
+        val game = rootService.currentGame
+
+        checkNotNull(game) {"No game is currently active"}
+        val currentPlayer =
+            if (game.isPlayerOneActive) game.players[0]
+            else game.players[1]
+
+
+
+        when{
+            game.playStack.size == 1 -> {
+                game.playStack.add(cardPlaced)
+                currentPlayer.hand.remove(cardPlaced)
+                currentPlayer.hand.add(cardTaken)
+                game.playStack.remove(cardTaken)
+            }
+            game.playStack.size == 2 -> {
+                if(game.playStack.last().suit == cardPlaced.suit || game.playStack.last().value == cardPlaced.value){
+                    game.playStack.add(cardPlaced)
+                    currentPlayer.hand.remove(cardPlaced)
+                    currentPlayer.hand.add(game.playStack.first())
+                    game.playStack.remove(game.playStack.first())
+                }else if(game.playStack.first().suit == cardPlaced.suit || game.playStack.first().value == cardPlaced.value){
+                    game.playStack.add(cardPlaced)
+                    currentPlayer.hand.remove(cardPlaced)
+                    currentPlayer.hand.add(game.playStack.last())
+                    game.playStack.remove(game.playStack.last())
+                }
+            }
+        }
+
+        currentPlayer.hasSpecialAction = false
+
+        onAllRefreshables {
+            refreshAfterSwapCard()
+        }
     }
 
     /**if there is more than 8 card in any player hand, player should discard one of them*/

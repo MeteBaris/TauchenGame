@@ -13,7 +13,7 @@ interface Refreshable {
 
     fun refreshAfterPlayCard() {}
 
-    fun refreshAfterDrawCard(card: Card){}
+    fun refreshAfterDrawCard(){}
 
     fun refreshAfterSwapCard() {}
 

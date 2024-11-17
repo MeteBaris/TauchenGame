@@ -23,18 +23,13 @@ class TauchenApplication : BoardGameApplication("TauchenGame"), Refreshable {
             resultMenuScene
         )
         registerMenuEvents()
-      //  rootService.gameService.startGame(listOf("Bob","Alice"))
-        rootService.gameService.startGame(listOf("Bob","Alice"))
         showMenuScene(mainMenuScene,0)
         showGameScene(gameScene)
         show()
     }
 
-
+//????????
     private fun registerMenuEvents(){
-        mainMenuScene.startButton.onMouseClicked ={
-            refreshAfterStartGame()
-        }
 
         mainMenuScene.exitButton.onMouseClicked = {
             exit()
@@ -42,7 +37,7 @@ class TauchenApplication : BoardGameApplication("TauchenGame"), Refreshable {
     }
 
     override fun refreshAfterStartGame() {
-        hideMenuScene(500)
+        hideMenuScene()
     }
 
 

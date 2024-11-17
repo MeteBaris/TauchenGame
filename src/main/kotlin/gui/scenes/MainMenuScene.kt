@@ -87,22 +87,7 @@ class MainMenuScene(val rootService: RootService,val tauchenApplication: Tauchen
         }
     }
 
-/*
-    val startNewGame: Button = Button(
-        height = 80,
-        width = 200,
-        posX = 50,
-        posY = 220,
-        text = "New Game",
-        font = Font(color = Color.WHITE, fontStyle = Font.FontStyle.ITALIC),
-        visual = ImageVisual("images/buttonBG.png")
-    ).apply {
-        onMouseClicked = {
-            rootService.gameService.startGame(
-                listOf(p1Input.text.trim(), p2Input.text.trim()))
-        }
-    }
-    */
+
     val exitButton: Button = Button(
         height = 80,
         width = 200,
@@ -125,8 +110,6 @@ class MainMenuScene(val rootService: RootService,val tauchenApplication: Tauchen
     init {
         addComponents(
             headLineLabel,
-           // menuLabel,
-        //    startNewGame,
             p1Label,
             p1Input,
             p2Label,
