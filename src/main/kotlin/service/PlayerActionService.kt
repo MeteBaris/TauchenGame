@@ -12,6 +12,7 @@ class PlayerActionService(private val rootService: RootService) :
     AbstractRefreshingService() {
 
 
+
     /**
      * The playCard(card: Card) method allows a player to play a card from their hand.
      * This card is placed in the center of the table, provided it complies with the game rules.
@@ -52,6 +53,7 @@ class PlayerActionService(private val rootService: RootService) :
             refreshAfterPlayCard()
         }
 
+
     }
 
     /**It controls if the card is playable*/
@@ -72,6 +74,7 @@ class PlayerActionService(private val rootService: RootService) :
         } else
             game.players[1]
 
+        if (playStack.size==2){
 
         if (playStack[0].suit == playStack[1].suit && playStack[0].suit == card.suit) {
             currentPlayer.collectionStack.addAll(playStack)
@@ -99,6 +102,8 @@ class PlayerActionService(private val rootService: RootService) :
             currentPlayer.score += 20
         } else {
             throw IllegalStateException("Invalid move. Only one matching card may be played.")
+        }
+
         }
 
         return false
@@ -124,6 +129,13 @@ class PlayerActionService(private val rootService: RootService) :
         }
 
         currentPlayer.hand.add(drawnCard)
+        if (game.playStack.isEmpty())
+            playCard(drawnCard)
+        else if (game.playStack.size==1 && isCardValid(drawnCard,rootService.currentGame?.playStack!![0]))
+            playCard(drawnCard)
+        else if (trioFormedHandling(drawnCard))  {
+            playCard(drawnCard)
+        }
 
         onAllRefreshables {
             refreshAfterDrawCard()

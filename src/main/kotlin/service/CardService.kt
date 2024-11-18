@@ -21,7 +21,7 @@ class CardService(private val rootService: RootService) :
     }
 
     /**it creates hands for players in order*/
-    //???????
+    //????????????????????? i changed it takeLast to take, dropLast to drop
     internal fun dealCards(): MutableList<Card> {
         val hand = deck.takeLast(5).toMutableList()
         deck = deck.dropLast(5).toMutableList()
