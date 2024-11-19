@@ -5,6 +5,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertSame
 
+/**
+ * Test cases for [Card]
+ */
+
 class CardTest {
     private val card1 = Card(CardSuit.SPADES, CardValue.THREE)
     private val card2 = Card(CardSuit.DIAMONDS, CardValue.THREE)

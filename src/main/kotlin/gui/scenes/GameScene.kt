@@ -64,10 +64,18 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
 
     private val player1Label =
         Label(width = 300, height = 50, posX = 350, posY = 200, text = "Player 1", font = Font(size = 14))
-    private val player1CollectedStack = LabeledStackView(posX = 1650, posY = 100, "collected")
+    private val player1CollectedStack = CardStack<CardView>(
+        posX = 1650,
+        posY = 100,
+        visual = ColorVisual(255, 255, 255, 50)
+    )
     private val player2Label =
         Label(width = 300, height = 50, posX = 350, posY = 900, text = "Player 2", font = Font(size = 14))
-    private val player2CollectedStack = LabeledStackView(posX = 1650, posY = 500, "collected")
+    private val player2CollectedStack = CardStack<CardView>(
+        posX = 1650,
+        posY = 500,
+        visual = ColorVisual(255, 255, 255, 50)
+    )
 
     private val player1Hand: LinearLayout<CardView> =
         LinearLayout<CardView>(
@@ -334,7 +342,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
     private fun initializePlayersHandView(cardImageLoader: CardImageLoader) {
         val game = rootService.currentGame
         checkNotNull(game) { "No started game found." }
-        cardMap.clear() // Clear the mapping to avoid stale data
+        cardMap.clear() // Clear the mapping
 
         val player1 = game.players[0]
         val player2 = game.players[1]
@@ -358,7 +366,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         }
     }
 
-
+/**Creating card views*/
     private fun createCardView(card: Card, cardImageLoader: CardImageLoader): CardView {
         return CardView(
             height = 200,
@@ -369,7 +377,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
             onMouseClicked = {
                 currentHandCard = card
                 println("${card.suit}${card.value}")
-                //new methods?????????????
+                //!!!!!!!!!!  is frontVisual right thing?
                 this.frontVisual= frontVisual
 
             }
@@ -384,10 +392,9 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         val currentPlayer = currentPlayerFinder()
 
         // get the card that was just drawn
-        val drawnCard = game.drawStack.lastOrNull() // Adjust based on your game's draw logic
+        val drawnCard = game.drawStack.lastOrNull()
         checkNotNull(drawnCard) { "No card was drawn." }
 
-        //?????????
         currentHandCard = drawnCard
 
         // move the card to the player's hand or update the view
@@ -405,12 +412,12 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         val currentPlayer = currentPlayerFinder()
         val currentCollectionStack = if (currentPlayer == game.players[0]) player1CollectedStack else player2CollectedStack
 
-        // Ensure play stack has exactly 3 cards before handling
+
         if (game.playStack.size == 3 && play_Stack.components.size == 3) {
             println("Trio formed! Moving cards to ${currentPlayer.name}'s collection stack.")
 
             // move cards from play_Stack to the current player's collected stack
-            moveCardViewLinearLayout(play_Stack,currentCollectionStack)
+            moveCardViewPlayStackToCollectionStack(play_Stack,currentCollectionStack)
 
             // clear the logical play stack in the game
             game.playStack.clear()
@@ -420,7 +427,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         }
 
         // end the turn in the game service (it does not work)
-        rootService.gameService.endTurn()
+
     }
 
 
@@ -436,20 +443,15 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         cardView.removeFromParent()
         toPlayerCollection.add(cardView)
     }
-
-
-  */
+ */
     /** all components from linearLayout to stack  */ // after app start there are so many exception
-    private fun moveCardViewLinearLayout(play_Stack: LinearLayout<CardView>, toPlayerCollectionStack: CardStack<CardView>) {
+    private fun moveCardViewPlayStackToCollectionStack(play_Stack: LinearLayout<CardView>, toPlayerCollectionStack: CardStack<CardView>) {
         play_Stack.forEach { cardView ->
             cardView.showFront()
             cardView.removeFromParent()
             toPlayerCollectionStack.add(cardView)
         }
     }
-
-
-
 
     private fun initializeDrawStackView(
         stack: MutableList<Card>,
@@ -465,12 +467,12 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         }
     }
 
-
+/**check the stack view  (MutableList - LabeledStackView)*/
     private fun checkStackView(stack: MutableList<Card>, stackView: LabeledStackView) {
         check(stack.size == stackView.components.size) {
             "Stack size (${stack.size}) is not equal to view size (${stackView.components.size})"
         }
-
+        /**stack.forEachIndexed  pairs the cardViews and cards */
         stack.forEachIndexed { index, cardOnStack ->
             val cardInView = cardMap[cardOnStack]
             val cardViewInStack = stackView.components[index]
@@ -483,14 +485,14 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         }
     }
 
+    /**this function check all Stack views*/
     private fun checkAllStackViews(game: TauchenGame) {
-      //  checkStackView(game.playStack,play_Stack as LabeledStackView)
         checkLinearLayout(game.playStack, play_Stack )
         checkStackView(game.drawStack, draw_Stack)
         checkLinearLayout(game.players[0].hand, player1Hand )
-        checkStackView(game.players[0].collectionStack, player1CollectedStack)
+        moveCardViewPlayStackToCollectionStack(play_Stack, player1CollectedStack)
         checkLinearLayout(game.players[1].hand, player2Hand )
-        checkStackView(game.players[1].collectionStack, player2CollectedStack)
+        moveCardViewPlayStackToCollectionStack(play_Stack, player2CollectedStack)
     }
 
     private fun checkLinearLayout(stack:  MutableList<Card>,view: LinearLayout<CardView>){
@@ -501,9 +503,6 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         stack.forEachIndexed { index, cardOnStack ->
             val cardInView = cardMap[cardOnStack]
             val cardViewInStack = view.components[index]
-            if (cardInView == null) {
-                throw IllegalStateException("Card $cardOnStack not found in cardMap.")
-            }
             check(cardViewInStack == cardInView) {
                 "Card on stack ($cardOnStack) is not equal to card in view ($cardInView)"
             }

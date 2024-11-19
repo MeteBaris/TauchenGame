@@ -3,6 +3,10 @@ package service
 import entity.Player
 import entity.TauchenGame
 import gui.*
+/**
+ * Service layer class that provides the logic for actions not directly
+ * related to a single player.
+ */
 
 class GameService(
     private val rootService: RootService
@@ -96,10 +100,10 @@ class GameService(
                 game.players[1]
         if (game.drawStack.isNotEmpty()) {
 
-            if (game.playStack.size == 3) {
-                currentPlayer.collectionStack= game.playStack
-                game.playStack.clear()
-            }
+         /*   if (game.playStack.size == 3) {
+              //  currentPlayer.collectionStack= game.playStack
+                //game.playStack.clear()
+            }*/
             game.isPlayerOneActive = !game.isPlayerOneActive
         } else {
             endGame()

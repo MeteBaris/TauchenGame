@@ -19,7 +19,7 @@ class PlayerActionServiceTest {
         rootService = RootService()
         val players = mutableListOf(Player("bob",0,true), Player("tom",0,true))
         val playStack = mutableListOf<Card>()
-        val drawStack = mutableListOf(Card(CardSuit.HEARTS, CardValue.TWO)) // Add a card to drawStack
+        val drawStack = mutableListOf(Card(CardSuit.HEARTS, CardValue.TWO),Card(CardSuit.SPADES, CardValue.THREE)) // Add a card to drawStack
         val discardStack = mutableListOf<Card>()
 
         // Set up the game with initialized stacks and players
@@ -113,11 +113,14 @@ class PlayerActionServiceTest {
     @Test
     fun testDrawCardNonEmptyDrawStack() {
         val game = rootService.currentGame!!
+        val card1 = Card(CardSuit.HEARTS, CardValue.FIVE)
+        game.drawStack.add(card1)
         val cardToDraw = game.drawStack[0]
 
         playerActionService.drawCard()
 
         val currentPlayer = if (game.isPlayerOneActive) game.players[0] else game.players[1]
+
         assertTrue(currentPlayer.hand.contains(cardToDraw))
         assertFalse(game.drawStack.contains(cardToDraw))
     }
@@ -150,10 +153,15 @@ class PlayerActionServiceTest {
         game.playStack.add(cardInPlay1)
         game.playStack.add(cardInPlay2)
 
-        playerActionService.swapCard(cardInHand)
+        game.players[0].hand.add(cardInHand)
 
-        assertTrue(game.players[0].hand.contains(cardInPlay1))
-        assertTrue(game.playStack.contains(cardInHand))
+        playerActionService.swapCard(cardInPlay1, cardInHand)
+
+
+        assertTrue(game.players[0].hand.contains(cardInPlay1)) // Card from stack should now be in hand
+        assertTrue(game.playStack.contains(cardInHand)) // Card from hand should now be in stack
+        assertFalse(game.players[0].hand.contains(cardInHand)) // Original card should no longer be in hand
+        assertFalse(game.playStack.contains(cardInPlay1)) // Original card should no longer be in stack
     }
 
     /**Test discarding a card when hand size is nine*/

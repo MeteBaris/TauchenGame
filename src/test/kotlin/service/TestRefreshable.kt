@@ -73,7 +73,7 @@ class TestRefreshable(val rootService: RootService) : Refreshable{
         refreshAfterPlayCard = true
     }
 
-    override fun refreshAfterDrawCard(card: Card) {
+    override fun refreshAfterDrawCard() {
         refreshAfterDrawCard = true
     }
 
