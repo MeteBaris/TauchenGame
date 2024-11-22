@@ -30,10 +30,5 @@ data class Card(
         return true
     }
 
-    override fun hashCode(): Int {
-        var result = suit.hashCode()
-        result = 31 * result + value.hashCode()
-        return result
-    }
 
 }
