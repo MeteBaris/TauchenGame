@@ -14,7 +14,7 @@ class CardTest {
     private val card2 = Card(CardSuit.DIAMONDS, CardValue.THREE)
     private val card3 = Card(CardSuit.DIAMONDS, CardValue.JACK)
     private val card4 = Card(CardSuit.SPADES, CardValue.THREE)
-    private val card5 = card2;
+    private val card5 = card2
 
     @Test
     fun testEquality(){

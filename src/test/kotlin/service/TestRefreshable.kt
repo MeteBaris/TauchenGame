@@ -2,7 +2,7 @@ package service
 
 import entity.*
 import gui.Refreshable
-import service.*
+
 
 /**
  * [Refreshable] implementation that refreshes nothing, but remembers
@@ -73,7 +73,7 @@ class TestRefreshable(val rootService: RootService) : Refreshable{
         refreshAfterPlayCard = true
     }
 
-    override fun refreshAfterDrawCard() {
+    override fun refreshAfterDrawCard(lastCard: Card, hasToDiscard: Boolean) {
         refreshAfterDrawCard = true
     }
 

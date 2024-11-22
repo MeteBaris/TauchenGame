@@ -3,7 +3,8 @@ package service
 import gui.Refreshable
 
 /**
-
+ * Abstract class, which provides a function call a function to connect
+ * all refreshables
  */
 abstract class AbstractRefreshingService {
     private val refreshables = mutableListOf<Refreshable>()
