@@ -12,7 +12,6 @@ class GameService(
     private val rootService: RootService
 ) : AbstractRefreshingService() {
 
-   // val playerNames: List<String> = listOf("Alice", "Bob")
 
     /**The startGame(playerName: List<String>) method starts a new game with the specified player names.
      * It deals the cards and prepares the stacks and center of the table according to the game rules.
@@ -21,17 +20,19 @@ class GameService(
 
         val game = TauchenGame(mutableListOf(Player(playerNames[0], 0, true), Player(playerNames[1], 0, true)))
 
-
-        game.players.shuffle()
+        rootService.currentGame = game
 
         game.players[0].hand = rootService.cardService.dealCards()
         game.players[1].hand = rootService.cardService.dealCards()
 
+
         game.players[0].collectionStack = rootService.cardService.createCollectionStack().toMutableList()
         game.players[1].collectionStack = rootService.cardService.createCollectionStack().toMutableList()
-        game.drawStack = rootService.cardService.createDrawStack().toMutableList()
+        game.drawStack = rootService.cardService.createDrawStack()
 
-        rootService.currentGame = game
+
+
+
         game.isPlayerOneActive = true
 
 
@@ -43,7 +44,7 @@ class GameService(
     /**The endGame() method ends the current game and calculates the players final scores*/
     fun endGame() {
         val game = rootService.currentGame
-        if (game!!.players[0].score > game.players[1].score) {
+        if (game.players[0].score > game.players[1].score) {
             println(
                 "Winner is " + game.players[0].name + " with " +
                         game.players[0].score + " score."
@@ -85,7 +86,7 @@ class GameService(
             }
         }
 
-        rootService.currentGame = null
+     //   rootService.currentGame = null
     }
 
     /**The startTurn() starts automatically after startGame. */
@@ -115,7 +116,8 @@ class GameService(
 
             //!!!!!!!!!!!!!!!!
             currentPlayer.hasPlayed =true
-
+            game.isPlayerOneActive = !game.isPlayerOneActive
+            currentPlayer.hasPlayed = false
             onAllRefreshables {
                 refreshAfterEndTurn()
             }
@@ -125,10 +127,4 @@ class GameService(
 
     }
     }
-/*
-    /**Helper for selecting first player */
-    private fun selectStartingPlayer(players: MutableList<Player>): Player {
-        return players[0]
-    }
 
- */

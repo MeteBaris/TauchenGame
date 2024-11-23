@@ -22,7 +22,6 @@ class PlayerActionService(private val rootService: RootService) :
     fun playCard(card: Card) {
 
         val game = rootService.currentGame
-        checkNotNull(game) { "No game is currently active" }
         val playStack = game.playStack
         val currentPlayer: Player = if (game.isPlayerOneActive) {
             game.players[0]
@@ -38,6 +37,7 @@ class PlayerActionService(private val rootService: RootService) :
             if (isCardValid(game.playStack[0], card)) {
                 game.playStack.add(card)
                 currentPlayer.hand.remove(card)
+
             } else
                 throw IllegalStateException("No matching card that you can play.")
 
@@ -49,7 +49,6 @@ class PlayerActionService(private val rootService: RootService) :
                 println(currentPlayer.collectionStack)
                 isTrio = true
                 currentPlayer.score += 5
-
 
             } else if (playStack[0].value == playStack[1].value && playStack[0].value == card.value) {
                 playStack.add(card)
@@ -87,10 +86,13 @@ class PlayerActionService(private val rootService: RootService) :
         }
         currentPlayer.hasPlayed = true
 
+        println("${game.players[0].hand.size}  first player hand size after first played card")
+        println("${game.players[1].hand.size}  second player hand size after first played card")
         onAllRefreshables {
             refreshAfterPlayCard()
         }
     }
+
     /**It controls if the card is playable*/
     private fun isCardValid(stackCard: Card, card: Card): Boolean {
         return stackCard.suit == card.suit || stackCard.value == card.value
@@ -99,38 +101,34 @@ class PlayerActionService(private val rootService: RootService) :
     fun drawCard() {
         val game = rootService.currentGame
 
-        checkNotNull(game) { "No game currently running." }
+
         val currentPlayer =
             if (game.isPlayerOneActive) game.players[0]
             else game.players[1]
 
-
-        val drawnCard = game.drawStack.removeLastOrNull()
-        checkNotNull(drawnCard){ "No drawn card." }
-        currentPlayer.hand.add(drawnCard)
-
-        currentPlayer.lastDrawnCard = drawnCard
-/*
-        if (game.playStack.isEmpty())
-            playCard(drawnCard)
-        else if (game.playStack.size == 1 && isCardValid(drawnCard, game.playStack[0]))
-            playCard(drawnCard)
+        if (!currentPlayer.hasPlayed && game.playStack.size>0){
+            println(game.drawStack.size)
+            println("*****")
+            val drawnCard = game.drawStack.removeLast()
+            println(game.drawStack.size)
 
 
- */
-        onAllRefreshables {
-            refreshAfterDrawCard(drawnCard, hasToDiscard(currentPlayer))
+            currentPlayer.hand.add(drawnCard)
+            currentPlayer.lastDrawnCard = drawnCard
+
+            println("${currentPlayer.hand.size}" )
+        }else{
+            println("${currentPlayer.name} played already. please use the end turn button")
         }
+
+        onAllRefreshables {
+            refreshAfterDrawCard(currentPlayer.lastDrawnCard!!, hasToDiscard(currentPlayer))
+        }
+       // currentPlayer.lastDrawnCard = null
     }
 
     private fun hasToDiscard(player: Player): Boolean {
-        val game = rootService.currentGame
-        checkNotNull(game) { "No game currently running." }
-        /*val currentPlayer =
-            if (game.isPlayerOneActive) game.players[0]
-            else game.players[1]
 
-         */
         return player.hand.size > 8
     }
 
@@ -167,7 +165,6 @@ class PlayerActionService(private val rootService: RootService) :
     fun swapCard(cardTaken: Card, cardPlaced: Card) {
         val game = rootService.currentGame
 
-        checkNotNull(game) { "No game is currently active" }
         val currentPlayer =
             if (game.isPlayerOneActive) game.players[0]
             else game.players[1]
@@ -202,7 +199,6 @@ class PlayerActionService(private val rootService: RootService) :
     /**if there is more than 8 card in any player hand, player should discard one of them*/
     fun discardCard(card: Card) {
         val game = rootService.currentGame
-        checkNotNull(game) { "No game currently running." }
         val currentPlayer = if (game.isPlayerOneActive) game.players[0]
         else game.players[1]
 

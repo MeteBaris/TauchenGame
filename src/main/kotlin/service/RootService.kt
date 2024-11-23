@@ -20,7 +20,7 @@ class RootService {
     /**
      * The currently active game. Can be `null`, if no game has started yet.
      */
-    var currentGame : TauchenGame? = null
+    lateinit var currentGame : TauchenGame
 
     /**
      * Adds the provided [newRefreshable] to all services connected to this root service

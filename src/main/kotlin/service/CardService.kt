@@ -33,13 +33,15 @@ class CardService(private val rootService: RootService) :
     }
 
     /** It creates draw stack after dealing cards (I hope) (??? -> does it work?)*/
-    fun createDrawStack(): List<Card> {
+    fun createDrawStack(): MutableList<Card> {
         return deck
     }
     /** It creates discard stack after dealing cards (I hope) */
-    fun createDiscardStack(): List<Card> {
-        val game = rootService.currentGame
+ /*   fun createDiscardStack(): List<Card> {
+
         val discardStack: MutableList<Card> = mutableListOf()
         return discardStack
     }
+
+  */
 }
