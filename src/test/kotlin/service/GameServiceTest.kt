@@ -62,7 +62,7 @@ class GameServiceTest {
     @Test
     fun testEndTurnNoGame() {
         /** Set the current game of the root service to null*/
-        rootService.currentGame = null
+
 
         /**Test: No game is currently active*/
         assertThrows<IllegalStateException> { rootService.gameService.endTurn() }

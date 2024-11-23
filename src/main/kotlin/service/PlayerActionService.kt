@@ -22,6 +22,7 @@ class PlayerActionService(private val rootService: RootService) :
     fun playCard(card: Card) {
 
         val game = rootService.currentGame
+        checkNotNull(game)
         val playStack = game.playStack
         val currentPlayer: Player = if (game.isPlayerOneActive) {
             game.players[0]
@@ -100,7 +101,7 @@ class PlayerActionService(private val rootService: RootService) :
 
     fun drawCard() {
         val game = rootService.currentGame
-
+        checkNotNull(game)
 
         val currentPlayer =
             if (game.isPlayerOneActive) game.players[0]
@@ -164,7 +165,7 @@ class PlayerActionService(private val rootService: RootService) :
     // I think it does not work
     fun swapCard(cardTaken: Card, cardPlaced: Card) {
         val game = rootService.currentGame
-
+        checkNotNull(game)
         val currentPlayer =
             if (game.isPlayerOneActive) game.players[0]
             else game.players[1]
@@ -199,6 +200,7 @@ class PlayerActionService(private val rootService: RootService) :
     /**if there is more than 8 card in any player hand, player should discard one of them*/
     fun discardCard(card: Card) {
         val game = rootService.currentGame
+        checkNotNull(game)
         val currentPlayer = if (game.isPlayerOneActive) game.players[0]
         else game.players[1]
 

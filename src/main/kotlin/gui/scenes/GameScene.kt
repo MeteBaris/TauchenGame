@@ -116,10 +116,12 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         )
 
     private fun currentPlayerFinder(): Player {
-        return if (rootService.currentGame.isPlayerOneActive) {
-            rootService.currentGame.players[0]
+        val game = rootService.currentGame
+        checkNotNull(game)
+        return if (game.isPlayerOneActive) {
+            game.players[0]
         } else
-            rootService.currentGame.players[1]
+            game.players[1]
     }
     /*
         private fun otherPlayerFinder(): Player {

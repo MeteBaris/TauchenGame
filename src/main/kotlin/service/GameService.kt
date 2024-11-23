@@ -44,6 +44,7 @@ class GameService(
     /**The endGame() method ends the current game and calculates the players final scores*/
     fun endGame() {
         val game = rootService.currentGame
+        checkNotNull(game)
         if (game.players[0].score > game.players[1].score) {
             println(
                 "Winner is " + game.players[0].name + " with " +

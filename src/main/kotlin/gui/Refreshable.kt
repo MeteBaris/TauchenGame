@@ -2,7 +2,7 @@ package gui
 
 import entity.Card
 import entity.Player
-import javax.swing.UIDefaults.ProxyLazyValue
+
 
 interface Refreshable {
 
