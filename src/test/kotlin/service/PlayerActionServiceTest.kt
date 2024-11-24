@@ -18,7 +18,7 @@ class PlayerActionServiceTest {
         rootService = RootService()
         val players = mutableListOf(Player("bob",0,true), Player("tom",0,true))
         val playStack = mutableListOf<Card>()
-        var drawStack = mutableListOf(Card(CardSuit.HEARTS, CardValue.TWO),Card(CardSuit.SPADES, CardValue.THREE)) // Add a card to drawStack
+        val drawStack = mutableListOf(Card(CardSuit.HEARTS, CardValue.TWO),Card(CardSuit.SPADES, CardValue.THREE)) // Add a card to drawStack
         val discardStack = mutableListOf<Card>()
 
         // Set up the game with initialized stacks and players
@@ -127,28 +127,36 @@ class PlayerActionServiceTest {
         assertTrue(game.drawStack.isEmpty())
     }
 
-    /**Test for swapping cards*/
+    /** Test for swapping cards */
     @Test
     fun testSwapCard() {
         val game = rootService.currentGame!!
         game.isPlayerOneActive = true
-        val cardInHand = Card(CardSuit.HEARTS, CardValue.SEVEN)
+        val cardPlaced = Card(CardSuit.HEARTS, CardValue.SEVEN)
         val cardInPlay1 = Card(CardSuit.DIAMONDS, CardValue.SEVEN)
         val cardInPlay2 = Card(CardSuit.SPADES, CardValue.SEVEN)
 
         game.playStack.add(cardInPlay1)
         game.playStack.add(cardInPlay2)
 
-        game.players[0].hand.add(cardInHand)
+        game.players[0].hand.add(cardPlaced)
+        game.players[0].hasSpecialAction = true
 
-        playerActionService.swapCard(cardInPlay1, cardInHand)
+        // Test successful swap
+        assertDoesNotThrow { playerActionService.swapCard(cardInPlay1, cardPlaced) }
 
         assertTrue(game.players[0].hand.contains(cardInPlay1)) // Card from stack should now be in hand
-        assertTrue(game.playStack.contains(cardInHand)) // Card from hand should now be in stack
-        assertFalse(game.players[0].hand.contains(cardInHand)) // Original card should no longer be in hand
+        assertTrue(game.playStack.contains(cardPlaced)) // Card from hand should now be in stack
+        assertFalse(game.players[0].hand.contains(cardPlaced)) // Original card should no longer be in hand
         assertFalse(game.playStack.contains(cardInPlay1)) // Original card should no longer be in stack
-    }
+        assertFalse(game.players[0].hasSpecialAction) // Special action should now be false
 
+        // Test swap with invalid card
+        val invalidCard = Card(CardSuit.CLUBS, CardValue.KING)
+        game.players[0].hand.add(invalidCard)
+        assertDoesNotThrow{ playerActionService.swapCard(invalidCard, cardPlaced) }
+        assertFalse(game.playStack.contains(invalidCard))
+    }
     /**Test discarding a card when hand size is nine*/
     @Test
     fun testDiscardCard() {

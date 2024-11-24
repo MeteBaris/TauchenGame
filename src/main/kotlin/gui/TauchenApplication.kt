@@ -2,7 +2,6 @@ package gui
 
 import tools.aqua.bgw.core.BoardGameApplication
 import service.*
-import entity.*
 import gui.scenes.GameScene
 import gui.scenes.MainMenuScene
 import gui.scenes.NextPlayerScene
@@ -60,6 +59,9 @@ class TauchenApplication : BoardGameApplication("TauchenGame"), Refreshable {
     private fun registerMenuEvents(){
 
         mainMenuScene.exitButton.onMouseClicked = {
+            exit()
+        }
+        resultMenuScene.exitButton.onMouseClicked = {
             exit()
         }
     }

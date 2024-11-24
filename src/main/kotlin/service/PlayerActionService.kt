@@ -13,8 +13,8 @@ class PlayerActionService(private val rootService: RootService) :
     /**
      * Indicates whether a trio has been completed.
      */
-    var isTrio:Boolean = false
-    var hasDrawn:Boolean= false
+    var isTrio: Boolean = false
+    var hasDrawn: Boolean = false
 
     /**
      * The playCard(card: Card) method allows a player to play a card from their hand.
@@ -27,14 +27,15 @@ class PlayerActionService(private val rootService: RootService) :
 
         val game = rootService.currentGame
         checkNotNull(game)
-        game.playStack
 
 
         val currentPlayer: Player = if (game.isPlayerOneActive) {
             game.players[0]
         } else
             game.players[1]
-
+        if (!currentPlayer.hand.contains(card)) {
+            throw IllegalArgumentException("Card not found in hand")
+        }
         /**If there is not any card in the table, all cards are playable*/
         if (game.playStack.size == 0) {
             game.playStack.add(card)
@@ -64,7 +65,8 @@ class PlayerActionService(private val rootService: RootService) :
 
         } else if (game.playStack.size == 2) {
             if (game.playStack[0].suit == game.playStack[1].suit && game.playStack[0].suit == card.suit &&
-                game.playStack[1].suit == card.suit) {
+                game.playStack[1].suit == card.suit
+            ) {
 
                 game.playStack.add(card)
                 currentPlayer.hand.remove(card)
@@ -81,7 +83,8 @@ class PlayerActionService(private val rootService: RootService) :
                 }
 
             } else if (game.playStack[0].value == game.playStack[1].value && game.playStack[0].value == card.value &&
-                game.playStack[1].value == card.value) {
+                game.playStack[1].value == card.value
+            ) {
                 game.playStack.add(card)
                 currentPlayer.hand.remove(card)
                 currentPlayer.collectionStack.addAll(game.playStack)
@@ -99,7 +102,8 @@ class PlayerActionService(private val rootService: RootService) :
                 }
 
             } else if (game.playStack[0].suit == game.playStack[1].suit && game.playStack[0].suit == card.suit &&
-                game.playStack[1].suit == card.suit) {
+                game.playStack[1].suit == card.suit
+            ) {
                 game.playStack.add(card)
                 currentPlayer.hand.remove(card)
                 currentPlayer.collectionStack.addAll(game.playStack)
@@ -115,8 +119,9 @@ class PlayerActionService(private val rootService: RootService) :
                     refreshAfterPlayCard()
                 }
 
-            } else if (game.playStack[0].value == game.playStack[1].value &&game.playStack[0].value == card.value&&
-                game.playStack[1].value == card.value) {
+            } else if (game.playStack[0].value == game.playStack[1].value && game.playStack[0].value == card.value &&
+                game.playStack[1].value == card.value
+            ) {
                 game.playStack.add(card)
                 currentPlayer.hand.remove(card)
                 currentPlayer.collectionStack.addAll(game.playStack)
@@ -141,13 +146,13 @@ class PlayerActionService(private val rootService: RootService) :
     }
 
     /**
-    * Validates if a card can be played on top of another card in the play stack.
-    *
-    * @param stackCard The card already in the play stack.
-    * @param card The card the player intends to play.
-    * @return `true` if the card can be played, `false` otherwise.
-    */
-     fun isCardValid(stackCard: Card, card: Card): Boolean {
+     * Validates if a card can be played on top of another card in the play stack.
+     *
+     * @param stackCard The card already in the play stack.
+     * @param card The card the player intends to play.
+     * @return `true` if the card can be played, `false` otherwise.
+     */
+    fun isCardValid(stackCard: Card, card: Card): Boolean {
         return stackCard.suit == card.suit || stackCard.value == card.value
     }
 
@@ -160,38 +165,38 @@ class PlayerActionService(private val rootService: RootService) :
         val game = rootService.currentGame
         checkNotNull(game)
 
-        if(game.drawStack.isNotEmpty() ) {
-            if (!hasDrawn){
+        if (game.drawStack.isNotEmpty()) {
+            if (!hasDrawn) {
 
 
-            val currentPlayer =
-                if (game.isPlayerOneActive) game.players[0]
-                else game.players[1]
+                val currentPlayer =
+                    if (game.isPlayerOneActive) game.players[0]
+                    else game.players[1]
 
-            if (!currentPlayer.hasPlayed) {
-                println(game.drawStack.size)
-                println("*****")
-                val drawnCard = game.drawStack.removeLast()
-                println(game.drawStack.size)
+                if (!currentPlayer.hasPlayed) {
+                    println(game.drawStack.size)
+                    println("*****")
+                    val drawnCard = game.drawStack.removeLast()
+                    println(game.drawStack.size)
 
-                /* currentPlayer.hand.add(drawnCard)
-            currentPlayer.lastDrawnCard = drawnCard
-
-            */
+                    /* currentPlayer.hand.add(drawnCard)
                 currentPlayer.lastDrawnCard = drawnCard
-                currentPlayer.hand.add(currentPlayer.lastDrawnCard!!)
 
-                println("${currentPlayer.hand.size}")
-            } else {
-                println("${currentPlayer.name} played already. please use the end turn button")
-            }
+                */
+                    currentPlayer.lastDrawnCard = drawnCard
+                    currentPlayer.hand.add(currentPlayer.lastDrawnCard!!)
+
+                    println("${currentPlayer.hand.size}")
+                } else {
+                    println("${currentPlayer.name} played already. please use the end turn button")
+                }
                 hasDrawn = true
-            onAllRefreshables {
-                refreshAfterDrawCard(currentPlayer.lastDrawnCard!!, hasToDiscard(currentPlayer))
+                onAllRefreshables {
+                    refreshAfterDrawCard(currentPlayer.lastDrawnCard!!, hasToDiscard(currentPlayer))
+                }
+                currentPlayer.lastDrawnCard = null
             }
-            currentPlayer.lastDrawnCard = null
-        }
-        }else
+        } else
             rootService.gameService.endGame()
     }
 
@@ -215,33 +220,26 @@ class PlayerActionService(private val rootService: RootService) :
         val currentPlayer =
             if (game.isPlayerOneActive) game.players[0]
             else game.players[1]
-        when {
-            game.playStack.size == 1 -> {
+        if (currentPlayer.hasSpecialAction) {
+            if (game.playStack.all {
+                    it.suit == cardTaken.suit || it.value == cardTaken.value
+                            && game.playStack.size in 1..2
+                }) {
                 game.playStack.add(cardPlaced)
                 currentPlayer.hand.remove(cardPlaced)
                 currentPlayer.hand.add(cardTaken)
                 game.playStack.remove(cardTaken)
-            }
-
-            game.playStack.size == 2 -> {
-                if (game.playStack.last().suit == cardTaken.suit || game.playStack.last().value == cardPlaced.value) {
-                    game.playStack.add(cardPlaced)
-                    currentPlayer.hand.remove(cardPlaced)
-                    currentPlayer.hand.add(game.playStack.first())
-                    game.playStack.remove(game.playStack.first())
-                } else if (game.playStack.first().suit == cardPlaced.suit || game.playStack.first().value == cardPlaced.value) {
-                    game.playStack.add(cardPlaced)
-                    currentPlayer.hand.remove(cardPlaced)
-                    currentPlayer.hand.add(game.playStack.last())
-                    game.playStack.remove(game.playStack.last())
+                currentPlayer.hasSpecialAction = false
+                currentPlayer.hasPlayed
+                onAllRefreshables {
+                    refreshAfterSwapCard()
                 }
-            }
+            } else
+                throw IllegalArgumentException("Selected card is not valid")
         }
-        currentPlayer.hasSpecialAction = false
-        onAllRefreshables {
-            refreshAfterSwapCard()
-        }
+
     }
+
 
     /**
      * Allows the player to discard a card from their hand to the discard stack

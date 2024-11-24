@@ -14,7 +14,8 @@ import tools.aqua.bgw.visual.ColorVisual
 import java.awt.Color
 
 
-class ResultMenuScene(private val rootService: RootService,val tauchenApplication: TauchenApplication) : MenuScene(400, 1080), Refreshable {
+class ResultMenuScene(private val rootService: RootService, val tauchenApplication: TauchenApplication) :
+    MenuScene(400, 1080), Refreshable {
     // This pane is used to hold all components of the scene and easily center them on the screen
     val game = rootService.currentGame
 
@@ -32,20 +33,20 @@ class ResultMenuScene(private val rootService: RootService,val tauchenApplicatio
 
     }
 
-    val quitButton = Button(width = 140, height = 35, posX = 50, posY = 265, text = "Quit").apply {
+    val exitButton = Button(width = 140, height = 35, posX = 50, posY = 265, text = "Quit").apply {
         visual = ColorVisual(Color(221, 136, 136))
     }
 
     val newGameButton = Button(width = 140, height = 35, posX = 210, posY = 265, text = "New Game").apply {
         onMouseClicked = {
-            rootService.gameService.startGame(mutableListOf(text,text))
+            rootService.gameService.startGame(mutableListOf(text, text))
         }
         visual = ColorVisual(Color(136, 221, 136))
     }
 
     init {
         opacity = .5
-        addComponents(headlineLabel, p1Score, p2Score, gameResult, newGameButton, quitButton)
+        addComponents(headlineLabel, p1Score, p2Score, gameResult, newGameButton, exitButton)
     }
 
     private fun Player.scoreString(): String = "${this.name} scored ${this.score} points."

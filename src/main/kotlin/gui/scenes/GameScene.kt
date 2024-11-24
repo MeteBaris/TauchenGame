@@ -243,8 +243,6 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
             val game = rootService.currentGame
             checkNotNull(game) { "No game found." }
 
-
-
             if (currentHandCard == null ) {
                 throw IllegalStateException("No card selected.")
             } else if(!currentPlayerFinder().hasPlayed){
@@ -353,7 +351,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         endTurnButton.isDisabled = false
 
 
-        //    checkAllStackViews(game)
+        //checkAllStackViews(game)
 
     }
 
@@ -364,6 +362,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
             toCollectStack.add(view)
         }
     }
+
 
     override fun refreshAfterStartTurn() {
         val game = rootService.currentGame
@@ -382,7 +381,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         currentPlayer.hasPlayed = false
 
         endTurnButton.isDisabled = true
-        swapCardButton.isDisabled = false
+        swapCardButton.isDisabled = true
         playCardButton.isDisabled = false
         draw_Stack.isDisabled = false
 
@@ -399,21 +398,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
     }
 
 
-    /**Creating card views*/
-    private fun createCardView(card: Card, cardImageLoader: CardImageLoader): CardView {
-        return CardView(
-            height = 200,
-            width = 130,
-            front = cardImageLoader.frontImageFor(card.suit, card.value),
-            back = cardImageLoader.backImage
-        ).apply {
-            onMouseClicked = {
-                currentHandCard = card
-            //    println("${card.suit}${card.value}")
-                this.frontVisual = frontVisual
-            }
-        }
-    }
+
 
     override fun refreshAfterDrawCard(lastCard: Card, hasToDiscard: Boolean) {
         val game = rootService.currentGame
@@ -488,7 +473,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
             println("***********")
         }
 
-        updatePlayerHands(player1Hand,player2Hand)
+        updatePlayerHands()
         //   updatePlayerHands(player1Hand,player2Hand)
 
         swapCardButton.isDisabled = true
@@ -504,11 +489,26 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         endTurnButton.isDisabled = false
     }
 
-    /* override fun refreshAfterSwapCard() {
+     override fun refreshAfterSwapCard() {
 
      }
 
-     */
+
+    /**Creating card views*/
+    private fun createCardView(card: Card, cardImageLoader: CardImageLoader): CardView {
+        return CardView(
+            height = 200,
+            width = 130,
+            front = cardImageLoader.frontImageFor(card.suit, card.value),
+            back = cardImageLoader.backImage
+        ).apply {
+            onMouseClicked = {
+                currentHandCard = card
+                //?????????
+                this.frontVisual = frontVisual
+            }
+        }
+    }
     private fun moveCardView(cardView: CardView, playerHandStack: LinearLayout<CardView>) {
         cardView.showFront()
         cardView.removeFromParent()
@@ -520,7 +520,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         cardView.removeFromParent()
         toDiscard.add(cardView)
     }
-    private fun updatePlayerHands(player1HandView: LinearLayout<CardView>, player2HandView: LinearLayout<CardView>) {
+    private fun updatePlayerHands() {
 
         for (cardView in player1Hand) {
             cardView.flip()
