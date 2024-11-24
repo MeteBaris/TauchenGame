@@ -107,6 +107,7 @@ class GameService(
             currentPlayer.hasPlayed =true
             game.isPlayerOneActive = !game.isPlayerOneActive
             currentPlayer.hasPlayed = false
+
             onAllRefreshables {
                 refreshAfterEndTurn()
             }

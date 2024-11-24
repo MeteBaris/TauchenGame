@@ -56,6 +56,38 @@ class CardServiceTest {
         assertEquals(5, player1.hand.size, "Player 1 should have 5 cards in hand")
         assertEquals(5, player2.hand.size, "Player 2 should have 5 cards in hand")
     }
+
+    /** Tests createDrawStack() to ensure draw stack is properly initialized */
+    @Test
+    fun testCreateDrawStack() {
+        val drawStack = rootService.cardService.createDrawStack()
+
+        /** Assert draw stack is not empty and contains the remaining cards after dealing */
+        assertFalse(drawStack.isEmpty(), "Draw stack should not be empty")
+        assertEquals(42, drawStack.size, "Draw stack should contain 42 cards after dealing 10 cards")
+    }
+
+    /** Tests createCollectionStack() to ensure collection stack is empty initially */
+    @Test
+    fun testCreateCollectionStack() {
+        val collectionStack = rootService.cardService.createCollectionStack()
+
+        /** Assert collection stack is empty initially */
+        assertTrue(collectionStack.isEmpty(), "Collection stack should be empty initially")
+    }
+
+
+    /** Tests that dealCards() deals unique cards each time */
+    @Test
+    fun testUniqueCardsAfterDealing() {
+        val player1Hand = rootService.cardService.dealCards()
+        val player2Hand = rootService.cardService.dealCards()
+
+        /** Assert that there are no duplicate cards between players' hands */
+        val allCards = player1Hand + player2Hand
+        val uniqueCards = allCards.toSet()
+        assertEquals(allCards.size, uniqueCards.size, "All dealt cards should be unique")
+    }
 }
 
 

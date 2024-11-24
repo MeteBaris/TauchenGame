@@ -14,11 +14,7 @@ class PlayerActionService(private val rootService: RootService) :
      * Indicates whether a trio has been completed.
      */
     var isTrio:Boolean = false
-
-    /**
-     * Indicates whether the current player has drawn a card during their turn.
-     */
-    var hasDrawn:Boolean=false
+    var hasDrawn:Boolean= false
 
     /**
      * The playCard(card: Card) method allows a player to play a card from their hand.
@@ -31,7 +27,7 @@ class PlayerActionService(private val rootService: RootService) :
 
         val game = rootService.currentGame
         checkNotNull(game)
-        val playStack = game.playStack
+        game.playStack
 
 
         val currentPlayer: Player = if (game.isPlayerOneActive) {
@@ -43,68 +39,105 @@ class PlayerActionService(private val rootService: RootService) :
         if (game.playStack.size == 0) {
             game.playStack.add(card)
             currentPlayer.hand.remove(card)
+            currentPlayer.hasPlayed = true
+
+            println("${game.players[0].hand.size}  first player hand size after first played card")
+            println("${game.players[1].hand.size}  second player hand size after first played card")
+            onAllRefreshables {
+                refreshAfterPlayCard()
+            }
         } else if (game.playStack.size == 1) {
 
             if (isCardValid(game.playStack[0], card)) {
                 game.playStack.add(card)
                 currentPlayer.hand.remove(card)
+                currentPlayer.hasPlayed = true
+
+                println("${game.players[0].hand.size}  first player hand size after first played card")
+                println("${game.players[1].hand.size}  second player hand size after first played card")
+                onAllRefreshables {
+                    refreshAfterPlayCard()
+                }
 
             } else
                 throw IllegalStateException("No matching card that you can play.")
 
         } else if (game.playStack.size == 2) {
-            if (playStack[0].suit == playStack[1].suit && playStack[0].suit == card.suit &&
-                playStack[1].suit == card.suit) {
+            if (game.playStack[0].suit == game.playStack[1].suit && game.playStack[0].suit == card.suit &&
+                game.playStack[1].suit == card.suit) {
 
-                playStack.add(card)
+                game.playStack.add(card)
                 currentPlayer.hand.remove(card)
-                currentPlayer.collectionStack.addAll(playStack)
+                currentPlayer.collectionStack.addAll(game.playStack)
                 println(currentPlayer.collectionStack)
                 isTrio = true
                 currentPlayer.score += 5
+                currentPlayer.hasPlayed = true
 
-            } else if (playStack[0].value == playStack[1].value && playStack[0].value == card.value &&
-                playStack[1].value == card.value) {
-                playStack.add(card)
+                println("${game.players[0].hand.size}  first player hand size after first played card")
+                println("${game.players[1].hand.size}  second player hand size after first played card")
+                onAllRefreshables {
+                    refreshAfterPlayCard()
+                }
+
+            } else if (game.playStack[0].value == game.playStack[1].value && game.playStack[0].value == card.value &&
+                game.playStack[1].value == card.value) {
+                game.playStack.add(card)
                 currentPlayer.hand.remove(card)
-                currentPlayer.collectionStack.addAll(playStack)
+                currentPlayer.collectionStack.addAll(game.playStack)
                 println(currentPlayer.collectionStack)
 
                 isTrio = true
 
                 currentPlayer.score += 20
+                currentPlayer.hasPlayed = true
 
-            } else if (playStack[0].suit == playStack[1].suit && playStack[0].suit == card.suit &&
-                playStack[1].suit == card.suit) {
-                playStack.add(card)
+                println("${game.players[0].hand.size}  first player hand size after first played card")
+                println("${game.players[1].hand.size}  second player hand size after first played card")
+                onAllRefreshables {
+                    refreshAfterPlayCard()
+                }
+
+            } else if (game.playStack[0].suit == game.playStack[1].suit && game.playStack[0].suit == card.suit &&
+                game.playStack[1].suit == card.suit) {
+                game.playStack.add(card)
                 currentPlayer.hand.remove(card)
-                currentPlayer.collectionStack.addAll(playStack)
+                currentPlayer.collectionStack.addAll(game.playStack)
                 println(currentPlayer.collectionStack)
 
                 isTrio = true
                 currentPlayer.score += 5
+                currentPlayer.hasPlayed = true
 
-            } else if (playStack[0].value == playStack[1].value &&playStack[0].value == card.value&&
-                playStack[1].suit == card.suit) {
-                playStack.add(card)
+                println("${game.players[0].hand.size}  first player hand size after first played card")
+                println("${game.players[1].hand.size}  second player hand size after first played card")
+                onAllRefreshables {
+                    refreshAfterPlayCard()
+                }
+
+            } else if (game.playStack[0].value == game.playStack[1].value &&game.playStack[0].value == card.value&&
+                game.playStack[1].value == card.value) {
+                game.playStack.add(card)
                 currentPlayer.hand.remove(card)
-                currentPlayer.collectionStack.addAll(playStack)
+                currentPlayer.collectionStack.addAll(game.playStack)
                 println(currentPlayer.collectionStack)
 
                 isTrio = true
                 currentPlayer.score += 20
 
+                currentPlayer.hasPlayed = true
+
+                println("${game.players[0].hand.size}  first player hand size after first played card")
+                println("${game.players[1].hand.size}  second player hand size after first played card")
+                onAllRefreshables {
+                    refreshAfterPlayCard()
+                }
             }
+
         } else {
             throw IllegalStateException("No matching card that you can play.")
         }
-        currentPlayer.hasPlayed = true
 
-        println("${game.players[0].hand.size}  first player hand size after first played card")
-        println("${game.players[1].hand.size}  second player hand size after first played card")
-        onAllRefreshables {
-            refreshAfterPlayCard()
-        }
     }
 
     /**
@@ -127,32 +160,39 @@ class PlayerActionService(private val rootService: RootService) :
         val game = rootService.currentGame
         checkNotNull(game)
 
-        val currentPlayer =
-            if (game.isPlayerOneActive) game.players[0]
-            else game.players[1]
+        if(game.drawStack.isNotEmpty() ) {
+            if (!hasDrawn){
 
-        if (!currentPlayer.hasPlayed ){
-            println(game.drawStack.size)
-            println("*****")
-            val drawnCard = game.drawStack.removeLast()
-            println(game.drawStack.size)
 
-           /* currentPlayer.hand.add(drawnCard)
+            val currentPlayer =
+                if (game.isPlayerOneActive) game.players[0]
+                else game.players[1]
+
+            if (!currentPlayer.hasPlayed) {
+                println(game.drawStack.size)
+                println("*****")
+                val drawnCard = game.drawStack.removeLast()
+                println(game.drawStack.size)
+
+                /* currentPlayer.hand.add(drawnCard)
             currentPlayer.lastDrawnCard = drawnCard
 
             */
-            currentPlayer.lastDrawnCard = drawnCard
-            currentPlayer.hand.add(currentPlayer.lastDrawnCard!!)
+                currentPlayer.lastDrawnCard = drawnCard
+                currentPlayer.hand.add(currentPlayer.lastDrawnCard!!)
 
-            println("${currentPlayer.hand.size}" )
-        }else{
-            println("${currentPlayer.name} played already. please use the end turn button")
+                println("${currentPlayer.hand.size}")
+            } else {
+                println("${currentPlayer.name} played already. please use the end turn button")
+            }
+                hasDrawn = true
+            onAllRefreshables {
+                refreshAfterDrawCard(currentPlayer.lastDrawnCard!!, hasToDiscard(currentPlayer))
+            }
+            currentPlayer.lastDrawnCard = null
         }
-
-        onAllRefreshables {
-            refreshAfterDrawCard(currentPlayer.lastDrawnCard!!, hasToDiscard(currentPlayer))
-        }
-        currentPlayer.lastDrawnCard = null
+        }else
+            rootService.gameService.endGame()
     }
 
     /**

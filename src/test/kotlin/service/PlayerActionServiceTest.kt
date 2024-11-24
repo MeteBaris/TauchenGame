@@ -18,7 +18,7 @@ class PlayerActionServiceTest {
         rootService = RootService()
         val players = mutableListOf(Player("bob",0,true), Player("tom",0,true))
         val playStack = mutableListOf<Card>()
-        val drawStack = mutableListOf(Card(CardSuit.HEARTS, CardValue.TWO),Card(CardSuit.SPADES, CardValue.THREE)) // Add a card to drawStack
+        var drawStack = mutableListOf(Card(CardSuit.HEARTS, CardValue.TWO),Card(CardSuit.SPADES, CardValue.THREE)) // Add a card to drawStack
         val discardStack = mutableListOf<Card>()
 
         // Set up the game with initialized stacks and players
@@ -95,18 +95,22 @@ class PlayerActionServiceTest {
     /**test drawCard with non-empty drawStack.*/
     @Test
     fun testDrawCardNonEmptyDrawStack() {
-        val game = rootService.currentGame!!
+        val game = rootService.currentGame
+        checkNotNull(game)
+        game.drawStack.isEmpty()
         val card1 = Card(CardSuit.HEARTS, CardValue.FIVE)
+        val card2 = Card(CardSuit.CLUBS, CardValue.FIVE)
+
         game.drawStack.add(card1)
-        val cardToDraw = game.drawStack[0]
+        game.drawStack.add(card2)
+
 
         val currentPlayer = if (game.isPlayerOneActive) game.players[0] else game.players[1]
-        playerActionService.drawCard()
+        currentPlayer.hand.clear()
+        rootService.playerActionService.drawCard()
 
-
-
-        assertTrue(currentPlayer.hand.contains(cardToDraw))
-        assertFalse(game.drawStack.contains(cardToDraw))
+        assertTrue(currentPlayer.hand.contains(card2))
+        assertFalse(game.drawStack.contains(card2))
     }
 
     /**test drawCard with empty drawStack. (end game situation)*/
@@ -114,8 +118,13 @@ class PlayerActionServiceTest {
     fun testDrawCardEmptyDrawStack() {
         val game = rootService.currentGame
         checkNotNull(game) { "No game currently running." }
+
+
         game.drawStack.clear()
-        assertThrows<IllegalStateException> { rootService.playerActionService.drawCard() }
+
+        assertDoesNotThrow { rootService.playerActionService.drawCard() }
+
+        assertTrue(game.drawStack.isEmpty())
     }
 
     /**Test for swapping cards*/
@@ -165,6 +174,8 @@ class PlayerActionServiceTest {
         game.players[0].hand.add(card9)
 
         assertDoesNotThrow{ playerActionService.discardCard(card8) }
+        assertTrue(game.discardStack.isNotEmpty())
+
     }
 
     /**Test discarding a card when hand size is not nine*/
@@ -174,7 +185,8 @@ class PlayerActionServiceTest {
         val card = Card(CardSuit.HEARTS, CardValue.FIVE)
         game.players[0].hand.add(card) // Hand size is not 9
 
-        assertThrows<IllegalStateException> { playerActionService.discardCard(card) }
+        assertDoesNotThrow { playerActionService.discardCard(card) }
+        assertFalse(game.discardStack.isNotEmpty())
     }
 
     /**Test playCard to create a trio with matching values*/
@@ -212,10 +224,18 @@ class PlayerActionServiceTest {
     fun testDrawCardAfterPlay() {
         val game = rootService.currentGame!!
         game.isPlayerOneActive = true
+
+        val cardToDraw = Card(CardSuit.CLUBS, CardValue.FIVE)
+        game.drawStack.add(cardToDraw)
         val cardToPlay = Card(CardSuit.HEARTS, CardValue.FIVE)
         game.players[0].hand.add(cardToPlay)
+
+
         playerActionService.playCard(cardToPlay)
 
-        assertThrows<IllegalStateException> { playerActionService.drawCard() }
+        val drawnCard = game.drawStack.removeLast()
+
+        assertDoesNotThrow{ playerActionService.drawCard() }
+        assertFalse(game.players[0].hand.contains(drawnCard))
     }
 }

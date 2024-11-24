@@ -209,23 +209,23 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
     }
 
 
-      private val player1ScoreLabel = Label(
-          width = 300,
-          height = 50,
-          posX = 1500,
-          posY = 200,
-          font = Font(size = 22),
+    private val player1ScoreLabel = Label(
+        width = 300,
+        height = 50,
+        posX = 1500,
+        posY = 200,
+        font = Font(size = 22),
 
 
-      )
-      private val player2ScoreLabel = Label(
-          width = 300,
-          height = 50,
-          posX = 1500,
-          posY = 300,
-          font = Font(size = 22),
+        )
+    private val player2ScoreLabel = Label(
+        width = 300,
+        height = 50,
+        posX = 1500,
+        posY = 300,
+        font = Font(size = 22),
 
-      )
+        )
 
 
 
@@ -369,6 +369,15 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         val game = rootService.currentGame
         checkNotNull(game) { "No game found." }
 
+        rootService.playerActionService.hasDrawn=false
+
+        if (game.isPlayerOneActive){
+            player1Hand.isDisabled = false
+            player2Hand.isDisabled = true
+        } else{
+            player1Hand.isDisabled = true
+            player2Hand.isDisabled = false
+        }
         val currentPlayer = currentPlayerFinder()
         currentPlayer.hasPlayed = false
 
@@ -400,51 +409,51 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         ).apply {
             onMouseClicked = {
                 currentHandCard = card
-                println("${card.suit}${card.value}")
+            //    println("${card.suit}${card.value}")
                 this.frontVisual = frontVisual
             }
         }
     }
 
-override fun refreshAfterDrawCard(lastCard: Card, hasToDiscard: Boolean) {
-    val game = rootService.currentGame
-    checkNotNull(game) { "No game found." }
-    endTurnButton.isDisabled = false
-    println("${player1Hand.components.size}   player1 hand view")
-    println("${player2Hand.components.size}   player2 hand view")
-
-    val currentPlayer = currentPlayerFinder()
-
-
-    val cardView = cardMap[lastCard] as CardView
-
-    when (currentPlayer) {
-        game.players[0] -> moveCardView(cardView, player1Hand)
-        game.players[1] -> moveCardView(cardView, player2Hand)
-    }
-
-    currentHandCard = lastCard
-/*
-    if (game.playStack.size==2 ) {
-        if (rootService.playerActionService.isCardValid(game.playStack[0], lastCard)
-            && rootService.playerActionService.isCardValid(game.playStack[1], lastCard)
-        ) {
-
-            rootService.playerActionService.playCard(lastCard)
-
-        } else {
-            println("you have to end turn")
-        }
-        currentPlayer.hasPlayed = true
+    override fun refreshAfterDrawCard(lastCard: Card, hasToDiscard: Boolean) {
+        val game = rootService.currentGame
+        checkNotNull(game) { "No game found." }
         endTurnButton.isDisabled = false
+        println("${player1Hand.components.size}   player1 hand view")
+        println("${player2Hand.components.size}   player2 hand view")
 
-        println("${game.players[0].hand.size}   player1 hand size")
-        println("${game.players[1].hand.size}   player2 hand size")
+        val currentPlayer = currentPlayerFinder()
+
+
+        val cardView = cardMap[lastCard] as CardView
+
+        when (currentPlayer) {
+            game.players[0] -> moveCardView(cardView, player1Hand)
+            game.players[1] -> moveCardView(cardView, player2Hand)
+        }
+
+        currentHandCard = lastCard
+        /*
+            if (game.playStack.size==2 ) {
+                if (rootService.playerActionService.isCardValid(game.playStack[0], lastCard)
+                    && rootService.playerActionService.isCardValid(game.playStack[1], lastCard)
+                ) {
+
+                    rootService.playerActionService.playCard(lastCard)
+
+                } else {
+                    println("you have to end turn")
+                }
+                currentPlayer.hasPlayed = true
+                endTurnButton.isDisabled = false
+
+                println("${game.players[0].hand.size}   player1 hand size")
+                println("${game.players[1].hand.size}   player2 hand size")
+            }
+            */
+        endTurnButton.isDisabled = false
+        checkAllStackViews(game)
     }
-    */
-    endTurnButton.isDisabled = false
-    checkAllStackViews(game)
-}
 
 
     /**override function of refreshAfterEndTurn. */
@@ -493,13 +502,13 @@ override fun refreshAfterDrawCard(lastCard: Card, hasToDiscard: Boolean) {
         moveCardViewToDiscardStack(cardMap.forward(currentHandCard!!), discardStack)
         currentHandCard=null
         endTurnButton.isDisabled = false
-        }
-
-   /* override fun refreshAfterSwapCard() {
-
     }
 
-    */
+    /* override fun refreshAfterSwapCard() {
+
+     }
+
+     */
     private fun moveCardView(cardView: CardView, playerHandStack: LinearLayout<CardView>) {
         cardView.showFront()
         cardView.removeFromParent()
@@ -536,6 +545,7 @@ override fun refreshAfterDrawCard(lastCard: Card, hasToDiscard: Boolean) {
             val cardView = createCardView(card, cardImageLoader)
             cardView.showFront()
             player1Hand.add(cardView)
+
             cardMap[card] = cardView
         }
 
@@ -544,7 +554,9 @@ override fun refreshAfterDrawCard(lastCard: Card, hasToDiscard: Boolean) {
         player2.hand.forEach { card ->
             val cardView = createCardView(card, cardImageLoader)
             cardView.showBack()
+
             player2Hand.add(cardView)
+
             cardMap[card] = cardView
         }
     }
