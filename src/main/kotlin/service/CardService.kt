@@ -12,7 +12,8 @@ import entity.*
 class CardService(private val rootService: RootService) :
     AbstractRefreshingService() {
     private var deck: MutableList<Card> = createDeck().toMutableList()
-/**createDeck() function creates a shuffled deck for the game*/
+
+    /**createDeck() function creates a shuffled deck for the game*/
     internal fun createDeck(): List<Card> {
         return CardSuit.values().flatMap { suit ->
             CardValue.values().map { value -> Card(suit, value) }
@@ -32,16 +33,17 @@ class CardService(private val rootService: RootService) :
         return collectionStack
     }
 
-    /** It creates draw stack after dealing cards (I hope) (??? -> does it work?)*/
+    /** It creates draw stack after dealing cards */
     fun createDrawStack(): MutableList<Card> {
         return deck
     }
-    /** It creates discard stack after dealing cards (I hope) */
- /*   fun createDiscardStack(): List<Card> {
+
+    /** It creates discard stack */
+    fun createDiscardStack(): List<Card> {
 
         val discardStack: MutableList<Card> = mutableListOf()
         return discardStack
     }
 
-  */
+
 }

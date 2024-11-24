@@ -85,7 +85,7 @@ class TestRefreshable(val rootService: RootService) : Refreshable{
         refreshAfterDiscardCard = true
     }
 
-    override fun refreshAfterEndGame(winner : Player){
+    override fun refreshAfterEndGame(){
         refreshAfterEndGame = true
     }
 

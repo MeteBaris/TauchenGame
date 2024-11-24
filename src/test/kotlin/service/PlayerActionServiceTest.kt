@@ -47,7 +47,7 @@ class PlayerActionServiceTest {
     }
 
     @Test
-    /**test playCard with matching suits*/
+            /**test playCard with matching suits*/
     fun testPlayCardMatchingSuit() {
         val game = rootService.currentGame!!
         game.isPlayerOneActive = true
@@ -62,7 +62,7 @@ class PlayerActionServiceTest {
     }
 
     @Test
-    /**testplay card with  non-matching card (throws Exception)*/
+            /**testplay card with  non-matching card (throws Exception)*/
     fun testplayCardNonMatchingCard() {
         val game = rootService.currentGame!!
         game.isPlayerOneActive = true
@@ -92,24 +92,6 @@ class PlayerActionServiceTest {
         assertEquals(5, game.players[0].score)
     }
 
-    /**test for trio  with matching values*/
-  /*  @Test
-    fun testTrioWithMatchingValue() {
-        val game = rootService.currentGame!!
-        game.isPlayerOneActive = true
-        val card1 = Card(CardSuit.HEARTS, CardValue.FIVE)
-        val card2 = Card(CardSuit.CLUBS, CardValue.FIVE)
-        val cardToPlay = Card(CardSuit.SPADES, CardValue.FIVE)
-        game.playStack.addAll(listOf(card1, card2))
-        game.players[0].hand.add(cardToPlay)
-
-        playerActionService.trioFormedHandling(cardToPlay)
-
-        assertTrue(game.players[0].collectionStack.containsAll(listOf(card1, card2, cardToPlay)))
-        assertEquals(20, game.players[0].score)
-    }
-
-   */
     /**test drawCard with non-empty drawStack.*/
     @Test
     fun testDrawCardNonEmptyDrawStack() {
@@ -118,16 +100,16 @@ class PlayerActionServiceTest {
         game.drawStack.add(card1)
         val cardToDraw = game.drawStack[0]
 
+        val currentPlayer = if (game.isPlayerOneActive) game.players[0] else game.players[1]
         playerActionService.drawCard()
 
-        val currentPlayer = if (game.isPlayerOneActive) game.players[0] else game.players[1]
+
 
         assertTrue(currentPlayer.hand.contains(cardToDraw))
         assertFalse(game.drawStack.contains(cardToDraw))
     }
 
     /**test drawCard with empty drawStack. (end game situation)*/
-    //
     @Test
     fun testDrawCardEmptyDrawStack() {
         val game = rootService.currentGame
@@ -135,8 +117,6 @@ class PlayerActionServiceTest {
         game.drawStack.clear()
         assertThrows<IllegalStateException> { rootService.playerActionService.drawCard() }
     }
-
-
 
     /**Test for swapping cards*/
     @Test
@@ -147,15 +127,12 @@ class PlayerActionServiceTest {
         val cardInPlay1 = Card(CardSuit.DIAMONDS, CardValue.SEVEN)
         val cardInPlay2 = Card(CardSuit.SPADES, CardValue.SEVEN)
 
-
-
         game.playStack.add(cardInPlay1)
         game.playStack.add(cardInPlay2)
 
         game.players[0].hand.add(cardInHand)
 
         playerActionService.swapCard(cardInPlay1, cardInHand)
-
 
         assertTrue(game.players[0].hand.contains(cardInPlay1)) // Card from stack should now be in hand
         assertTrue(game.playStack.contains(cardInHand)) // Card from hand should now be in stack
@@ -198,5 +175,47 @@ class PlayerActionServiceTest {
         game.players[0].hand.add(card) // Hand size is not 9
 
         assertThrows<IllegalStateException> { playerActionService.discardCard(card) }
+    }
+
+    /**Test playCard to create a trio with matching values*/
+    @Test
+    fun testTrioWithMatchingValue() {
+        val game = rootService.currentGame!!
+        game.isPlayerOneActive = true
+
+        val card1 = Card(CardSuit.HEARTS, CardValue.FIVE)
+        val card2 = Card(CardSuit.SPADES, CardValue.FIVE)
+        val cardToPlay = Card(CardSuit.DIAMONDS, CardValue.FIVE)
+        game.playStack.addAll(listOf(card1, card2))
+        game.players[0].hand.add(cardToPlay)
+
+        playerActionService.playCard(cardToPlay)
+
+        assertTrue(game.players[0].collectionStack.containsAll(listOf(card1, card2, cardToPlay)))
+        assertEquals(20, game.players[0].score)
+    }
+
+    /**Test end turn after player has played a card*/
+    @Test
+    fun testEndTurnAfterPlayCard() {
+        val game = rootService.currentGame!!
+        game.isPlayerOneActive = true
+        val card = Card(CardSuit.HEARTS, CardValue.FIVE)
+        game.players[0].hand.add(card)
+        playerActionService.playCard(card)
+
+        assertTrue(game.players[0].hasPlayed)
+    }
+
+    /**Test draw card when player has already played*/
+    @Test
+    fun testDrawCardAfterPlay() {
+        val game = rootService.currentGame!!
+        game.isPlayerOneActive = true
+        val cardToPlay = Card(CardSuit.HEARTS, CardValue.FIVE)
+        game.players[0].hand.add(cardToPlay)
+        playerActionService.playCard(cardToPlay)
+
+        assertThrows<IllegalStateException> { playerActionService.drawCard() }
     }
 }

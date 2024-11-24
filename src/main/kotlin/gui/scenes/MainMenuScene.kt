@@ -95,7 +95,7 @@ class MainMenuScene(val rootService: RootService,val tauchenApplication: Tauchen
         posY = 330,
         text = "Exit",
         font = Font(color = Color.WHITE, fontStyle = Font.FontStyle.ITALIC),
-        visual = ImageVisual("images/buttonBG.png")
+        visual = ColorVisual(136,221,136)
     )
 
     val menuLabel: Label = Label(

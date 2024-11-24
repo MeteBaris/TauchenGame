@@ -1,76 +1,79 @@
 package gui.scenes
 
 
+import entity.Player
 import gui.Refreshable
+import gui.TauchenApplication
 import service.RootService
 import tools.aqua.bgw.core.MenuScene
 
+import tools.aqua.bgw.components.uicomponents.Button
+import tools.aqua.bgw.components.uicomponents.Label
+import tools.aqua.bgw.util.Font
+import tools.aqua.bgw.visual.ColorVisual
+import java.awt.Color
 
-class ResultMenuScene(val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
+
+class ResultMenuScene(private val rootService: RootService,val tauchenApplication: TauchenApplication) : MenuScene(400, 1080), Refreshable {
     // This pane is used to hold all components of the scene and easily center them on the screen
-  /*  private val contentPane = Pane<UIComponent>(
-        width = 700,
-        height = 500,
-        posX = 1920 / 2 - 700 / 2,
-        posY = 1080 / 2 - 500 / 2,
-        visual = ColorVisual(Color(0x0C2027))
+    val game = rootService.currentGame
+
+    private val headlineLabel = Label(
+        width = 300, height = 50, posX = 50, posY = 50,
+        text = "Game Over",
+        font = Font(size = 22)
     )
 
-    // This label is used to display the title of the scene
-    private val titleLabel = Label(
-        text = "GEWINNER",
-        width = 700,
-        height = 100,
-        posX = 0,
-        posY = 30,
-        alignment = Alignment.CENTER,
-        font = Font(30, Color(0xFFFFFFF), "JetBrains Mono ExtraBold")
-    )
+    private val p2Score = Label(width = 300, height = 35, posX = 50, posY = 125)
 
-    // This label is used to display the name of the winner
-    private val winnerLabel = Label(
-        text = "",
-        width = 600,
-        height = 200,
-        posX = 50,
-        posY = 150,
-        alignment = Alignment.CENTER,
-        font = Font(45, Color(0xFFFFFFF), "JetBrains Mono ExtraBold"),
-        visual = ColorVisual(Color(0x49585D))
-    )
+    private val p1Score = Label(width = 300, height = 35, posX = 50, posY = 160)
 
-    // This button is used to restart the game
-    private val restartButton = Button(
-        text = "NEUSTART",
-        width = 280,
-        height = 60,
-        posX = 700 / 2 - 280 / 2,
-        posY = 390,
-        font = Font(22, Color(0xFFFFFFF), "JetBrains Mono ExtraBold"),
-        visual = ColorVisual(Color(0x49585D))
-    ).apply {
-        // When the button is clicked, restart the game
+    private val gameResult = Label(width = 300, height = 35, posX = 50, posY = 195).apply {
+
+    }
+
+    val quitButton = Button(width = 140, height = 35, posX = 50, posY = 265, text = "Quit").apply {
+        visual = ColorVisual(Color(221, 136, 136))
+    }
+
+    val newGameButton = Button(width = 140, height = 35, posX = 210, posY = 265, text = "New Game").apply {
         onMouseClicked = {
-            // Access the onAllRefreshables method of the game service to call the refreshAfterGameRestart method
-            rootService.gameService.onAllRefreshables { refreshAfterPlayAgain() }
+            rootService.gameService.startGame(mutableListOf(text,text))
+        }
+        visual = ColorVisual(Color(136, 221, 136))
+    }
+
+    init {
+        opacity = .5
+        addComponents(headlineLabel, p1Score, p2Score, gameResult, newGameButton, quitButton)
+    }
+
+    private fun Player.scoreString(): String = "${this.name} scored ${this.score} points."
+
+
+    private fun TauchenApplication.gameResultString(): String {
+        val game = rootService.currentGame
+        checkNotNull(game) { "no game is active" }
+        val p1Score = game.players[0].score
+        val p2Score = game.players[1].score
+        return when {
+            p1Score - p2Score > 0 -> "${game.players[0].name} wins the game."
+            p1Score - p2Score < 0 -> "${game.players[1].name} wins the game."
+            else -> "Draw. No winner."
         }
     }
 
-    // Initialize the scene by setting the background color and adding all components to the content pane
-    init {
-        background = ColorVisual(Color(12, 32, 39, 240))
-        contentPane.addAll(titleLabel, winnerLabel, restartButton)
-        addComponents(contentPane)
+
+    override fun refreshAfterEndGame() {
+        val game = rootService.currentGame
+        checkNotNull(game) { "No game running" }
+
+
+
+        p1Score.text = game.players[0].scoreString()
+        p2Score.text = game.players[1].scoreString()
+        gameResult.text = tauchenApplication.gameResultString()
+
     }
 
-    /**
-     * The refreshAfterGameEnd method is called by the service layer after a game has ended.
-     * It sets the name of the winner.
-     *
-     * @param winner The [Player] who has won the game
-     */
-    override fun refreshAfterEndGame(winner: Player) {
-        winnerLabel.text = winner.name
-    }
-*/
 }
