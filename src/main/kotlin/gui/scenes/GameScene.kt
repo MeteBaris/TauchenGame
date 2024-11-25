@@ -20,7 +20,6 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 
 
-
 class GameScene(private val rootService: RootService, val tauchenApplication: TauchenApplication) :
     BoardGameScene(1920, 1080, background = ImageVisual("images/bg.jpg")), Refreshable {
 
@@ -29,7 +28,9 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
 
     /**it generates current hand card for ...*/
     private var currentHandCard: Card? = null
-
+    private var currentCardInPlayStack: Card? = null
+    var cardTaken: Card? = null
+    var cardPlaced: Card? = null
 
     override fun refreshAfterStartGame() {
         val game = rootService.currentGame
@@ -38,8 +39,9 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
 
         val cardImageLoader = CardImageLoader()
 
-        initializeDrawStack(game.drawStack, draw_Stack, cardImageLoader)
+        initializeDrawStack(game.drawStack, drawStack, cardImageLoader)
         initializePlayersHandView(cardImageLoader)
+        initializePlayStack(game.playStack, playStack, cardImageLoader)
         updatePlayerLabels(game)
 
         println("${currentPlayerFinder().name} is current player")
@@ -81,8 +83,8 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
     )
 
 
-    var player1Hand: LinearLayout<CardView> =
-        LinearLayout<CardView>(
+    private var player1Hand: LinearLayout<CardView> =
+        LinearLayout(
             height = 220,
             width = 800,
             posX = 560,
@@ -92,7 +94,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
             visual = ColorVisual(255, 255, 255, 50)
         )
     private val player2Hand: LinearLayout<CardView> =
-        LinearLayout<CardView>(
+        LinearLayout(
             height = 220,
             width = 800,
             posX = 560,
@@ -110,17 +112,6 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         } else
             game.players[1]
     }
-    /*
-        private fun otherPlayerFinder(): Player {
-            val game = rootService.currentGame
-            checkNotNull(game) { "No game is currently active" }
-            return if (!game.isPlayerOneActive) {
-                game.players[0]
-            } else
-                game.players[1]
-        }
-
-     */
 
     private val discardStack = CardStack<CardView>(
         posX = 1400,
@@ -141,9 +132,9 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         text = "Discard"
     ).apply {
         onMouseClicked = {
-            if (currentPlayerFinder().hand.size>8){
+            if (currentPlayerFinder().hand.size > 8) {
                 rootService.playerActionService.discardCard(currentHandCard!!)
-            }else{
+            } else {
                 throw IllegalStateException("Cards in the hand must be more than 8 cards")
             }
 
@@ -151,8 +142,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         }
     }
 
-
-    private val draw_Stack = CardStack<CardView>(
+    private val drawStack = CardStack<CardView>(
         posX = 400,
         posY = 410,
         DEFAULT_CARD_WIDTH,
@@ -161,21 +151,20 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         visual = cardImageLoader.backImage
     ).apply {
         onMouseClicked = {
-            if (!currentPlayerFinder().hasPlayed){
+            if (!currentPlayerFinder().hasPlayed) {
                 rootService.playerActionService.drawCard()
-            }
-            else {
+            } else {
                 throw IllegalStateException("Please play a card from hand or end this turn")
             }
         }
     }
 
-    private val draw_StackLabel = Label(
+    private val drawStacklabel = Label(
         posX = 400, posY = 360, text = "DRAW CARD"
     )
 
     /** place in the table where the game will be played */
-    private var play_Stack: LinearLayout<CardView> =
+    private var playStack: LinearLayout<CardView> =
         LinearLayout<CardView>(
             height = 220,
             width = 600,
@@ -185,7 +174,6 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
             alignment = Alignment.CENTER,
             visual = ColorVisual(255, 255, 255, 50)
         )
-
 
     private var currentPlayerHand: LinearLayout<CardView> = LinearLayout(
         height = 220,
@@ -228,9 +216,6 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         )
 
 
-
-
-
     private val playCardButton = Button(
         width = 150,
         height = 50,
@@ -243,9 +228,9 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
             val game = rootService.currentGame
             checkNotNull(game) { "No game found." }
 
-            if (currentHandCard == null ) {
+            if (currentHandCard == null) {
                 throw IllegalStateException("No card selected.")
-            } else if(!currentPlayerFinder().hasPlayed){
+            } else if (!currentPlayerFinder().hasPlayed) {
 
                 endTurnButton.isDisabled = false
                 swapCardButton.isDisabled = true
@@ -278,7 +263,24 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         posX = 820,
         posY = 680,
         text = "Swap Card"
-    )
+    ).apply {
+        onMouseClicked = {
+            if (currentPlayerFinder().hasSpecialAction) {
+
+                cardPlaced = currentHandCard!!
+                currentHandCard = null
+
+                playStack.onMouseClicked = {
+                    cardTaken = currentCardInPlayStack!!
+                    rootService.playerActionService.swapCard(cardTaken!!, cardPlaced!!)
+                    currentCardInPlayStack = null
+                }
+
+
+            }
+        }
+    }
+
 
     private val endGameButton = Button(
         width = 150,
@@ -286,7 +288,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         posX = 1800,
         posY = 50,
         text = "END GAME FOR TEST "
-    ).apply{
+    ).apply {
         onMouseClicked = {
             rootService.currentGame!!.drawStack.clear()
         }
@@ -303,9 +305,10 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
             player2CollectedStack,
             player1ScoreLabel,
             player2ScoreLabel,
-            draw_Stack,
-            draw_StackLabel,
-            play_Stack,
+            drawStack,
+            drawStacklabel,
+            playStack,
+
             swapCardButton,
             discardStack,
             endTurnButton,
@@ -315,7 +318,6 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
 
         )
     }
-
 
 
     private fun updatePlayerLabels(game: TauchenGame) {
@@ -339,11 +341,11 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
 
         /** checking if the cards actually is in the playStack*/
         when (currentPlayer) {
-            game.players[0] -> moveCardView(cardMap.forward(currentCard), play_Stack)
-            game.players[1] -> moveCardView(cardMap.forward(currentCard), play_Stack)
+            game.players[0] -> moveCardView(cardMap.forward(currentCard), playStack)
+            game.players[1] -> moveCardView(cardMap.forward(currentCard), playStack)
         }
         println("playStack size  = " + game.playStack.size)
-        println("playStack view Size = " + play_Stack.components.size)
+        println("playStack view Size = " + playStack.components.size)
 
         currentPlayer.hasPlayed = true
 
@@ -354,6 +356,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         //checkAllStackViews(game)
 
     }
+
 
     private fun moveCardViewToCardStack(currentPlayStack: LinearLayout<CardView>, toCollectStack: CardStack<CardView>) {
         currentPlayStack.components.forEach { view ->
@@ -368,12 +371,12 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         val game = rootService.currentGame
         checkNotNull(game) { "No game found." }
 
-        rootService.playerActionService.hasDrawn=false
+        rootService.playerActionService.hasDrawn = false
 
-        if (game.isPlayerOneActive){
+        if (game.isPlayerOneActive) {
             player1Hand.isDisabled = false
             player2Hand.isDisabled = true
-        } else{
+        } else {
             player1Hand.isDisabled = true
             player2Hand.isDisabled = false
         }
@@ -381,9 +384,9 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         currentPlayer.hasPlayed = false
 
         endTurnButton.isDisabled = true
-        swapCardButton.isDisabled = true
+        swapCardButton.isDisabled = false
         playCardButton.isDisabled = false
-        draw_Stack.isDisabled = false
+        drawStack.isDisabled = false
 
 
         // update player labels to show whose turn it is
@@ -394,10 +397,9 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         currentPlayerHand = if (game.isPlayerOneActive) player1Hand else player2Hand
         otherPlayerHand = if (!game.isPlayerOneActive) player2Hand else player1Hand
 
+
         println("Start turn for: ${if (game.isPlayerOneActive) "Player 1" else "Player 2"}")
     }
-
-
 
 
     override fun refreshAfterDrawCard(lastCard: Card, hasToDiscard: Boolean) {
@@ -418,24 +420,6 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         }
 
         currentHandCard = lastCard
-        /*
-            if (game.playStack.size==2 ) {
-                if (rootService.playerActionService.isCardValid(game.playStack[0], lastCard)
-                    && rootService.playerActionService.isCardValid(game.playStack[1], lastCard)
-                ) {
-
-                    rootService.playerActionService.playCard(lastCard)
-
-                } else {
-                    println("you have to end turn")
-                }
-                currentPlayer.hasPlayed = true
-                endTurnButton.isDisabled = false
-
-                println("${game.players[0].hand.size}   player1 hand size")
-                println("${game.players[1].hand.size}   player2 hand size")
-            }
-            */
         endTurnButton.isDisabled = false
         checkAllStackViews(game)
     }
@@ -451,20 +435,20 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         val currentCollectionStack =
             if (currentPlayer == game.players[0]) player1CollectedStack else player2CollectedStack
 
-        if (game.playStack.size == 3 && play_Stack.components.size == 3 && rootService.playerActionService.isTrio) {
+        if (game.playStack.size == 3 && playStack.components.size == 3 && rootService.playerActionService.isTrio) {
             println("Trio formed! Moving cards to ${currentPlayer.name}'s collection stack.")
 
             if (game.isPlayerOneActive) {
-                moveCardViewToCardStack(play_Stack, player1CollectedStack)
+                moveCardViewToCardStack(playStack, player1CollectedStack)
                 println(player1CollectedStack.components.size)
                 rootService.playerActionService.isTrio = false
             } else {
-                moveCardViewToCardStack(play_Stack, player2CollectedStack)
+                moveCardViewToCardStack(playStack, player2CollectedStack)
                 println(player2CollectedStack.components.size)
                 rootService.playerActionService.isTrio = false
             }
             // clear the logical play stack in the game
-            play_Stack.clear()
+            playStack.clear()
             game.playStack.clear()
 
             rootService.playerActionService.isTrio = false
@@ -474,9 +458,8 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         }
 
         updatePlayerHands()
-        //   updatePlayerHands(player1Hand,player2Hand)
 
-        swapCardButton.isDisabled = true
+        swapCardButton.isDisabled = false
         playCardButton.isDisabled = true
     }
 
@@ -485,13 +468,24 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         checkNotNull(game)
 
         moveCardViewToDiscardStack(cardMap.forward(currentHandCard!!), discardStack)
-        currentHandCard=null
+        currentHandCard = null
         endTurnButton.isDisabled = false
     }
 
-     override fun refreshAfterSwapCard() {
+    override fun refreshAfterSwapCard() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        endTurnButton.isDisabled = false
+        if (game.isPlayerOneActive) {
+            moveCardView(cardMap[cardTaken!!] as CardView, player1Hand)
+            moveCardView(cardMap[cardPlaced!!] as CardView, playStack)
+        } else {
 
-     }
+            moveCardView(cardMap[cardPlaced!!] as CardView, playStack)
+            moveCardView(cardMap[cardTaken!!] as CardView, player2Hand)
+        }
+
+    }
 
 
     /**Creating card views*/
@@ -504,11 +498,12 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         ).apply {
             onMouseClicked = {
                 currentHandCard = card
-                //?????????
+                currentCardInPlayStack = card
                 this.frontVisual = frontVisual
             }
         }
     }
+
     private fun moveCardView(cardView: CardView, playerHandStack: LinearLayout<CardView>) {
         cardView.showFront()
         cardView.removeFromParent()
@@ -520,6 +515,7 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         cardView.removeFromParent()
         toDiscard.add(cardView)
     }
+
     private fun updatePlayerHands() {
 
         for (cardView in player1Hand) {
@@ -575,34 +571,44 @@ class GameScene(private val rootService: RootService, val tauchenApplication: Ta
         }
     }
 
-    /*
-          /**check the stack view  (MutableList - LabeledStackView)*/
-          private fun checkStackView(stack: MutableList<Card>, stackView: LabeledStackView) {
-              check(stack.size == stackView.components.size) {
-                  "Stack size (${stack.size}) is not equal to view size (${stackView.components.size})"
-              }
-              /**stack.forEachIndexed  pairs the cardViews and cards */
-              stack.forEachIndexed { index, cardOnStack ->
-                  val cardInView = cardMap[cardOnStack]
-                  val cardViewInStack = stackView.components[index]
-                  check(cardViewInStack == cardInView) {
-                      "Card on stack ($cardOnStack) is not equal to card in view ($cardInView)"
-                  }
-              }
-          }
+    private fun initializePlayStack(
+        stack: MutableList<Card>,
+        stackView: LinearLayout<CardView>,
+        cardImageLoader: CardImageLoader
+    ) {
+        stackView.clear()
+        stack.forEach { card ->
+            val cardView = createCardView(card, cardImageLoader).apply {
+                onMouseClicked = {
+                    currentCardInPlayStack = card
+                }
+            }
+            stackView.add(cardView)
+            cardMap[card] = cardView
+        }
+    }
 
+    private fun checkStackView(stack: MutableList<Card>, stackView: CardStack<CardView>) {
+        check(stack.size == stackView.components.size) {
+            "Stack size (${stack.size}) is not equal to view size (${stackView.components.size})"
+        }
 
+        stack.forEachIndexed { index, cardOnStack ->
+            val cardInView = cardMap[cardOnStack]
+            val cardViewInStack = stackView.components[index]
+            check(cardViewInStack == cardInView) {
+                "Card on stack ($cardOnStack) is not equal to card in view ($cardInView)"
+            }
+        }
+    }
 
-     */
 
     /**this function check all Stack views*/
     private fun checkAllStackViews(game: TauchenGame) {
-        checkLinearLayout(game.playStack, play_Stack)
-        // checkStackView(game.drawStack, draw_Stack)
+        checkLinearLayout(game.playStack, playStack)
+        checkStackView(game.drawStack, drawStack)
         checkLinearLayout(game.players[0].hand, player1Hand)
-        //   moveCardViewPlayStackToCollectionStack(play_Stack, player1CollectedStack)
         checkLinearLayout(game.players[1].hand, player2Hand)
-        // moveCardViewPlayStackToCollectionStack(play_Stack, player2CollectedStack)
     }
 
 

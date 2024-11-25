@@ -52,7 +52,6 @@ class PlayerActionService(private val rootService: RootService) :
             if (isCardValid(game.playStack[0], card)) {
                 game.playStack.add(card)
                 currentPlayer.hand.remove(card)
-                currentPlayer.hasPlayed = true
 
                 println("${game.players[0].hand.size}  first player hand size after first played card")
                 println("${game.players[1].hand.size}  second player hand size after first played card")
@@ -71,10 +70,11 @@ class PlayerActionService(private val rootService: RootService) :
                 game.playStack.add(card)
                 currentPlayer.hand.remove(card)
                 currentPlayer.collectionStack.addAll(game.playStack)
-                println(currentPlayer.collectionStack)
                 isTrio = true
                 currentPlayer.score += 5
-                currentPlayer.hasPlayed = true
+
+                game.players[0].hasSpecialAction = true
+                game.players[1].hasSpecialAction = true
 
                 println("${game.players[0].hand.size}  first player hand size after first played card")
                 println("${game.players[1].hand.size}  second player hand size after first played card")
@@ -88,12 +88,11 @@ class PlayerActionService(private val rootService: RootService) :
                 game.playStack.add(card)
                 currentPlayer.hand.remove(card)
                 currentPlayer.collectionStack.addAll(game.playStack)
-                println(currentPlayer.collectionStack)
 
                 isTrio = true
-
-                currentPlayer.score += 20
                 currentPlayer.hasPlayed = true
+                game.players[0].hasSpecialAction = true
+                game.players[1].hasSpecialAction = true
 
                 println("${game.players[0].hand.size}  first player hand size after first played card")
                 println("${game.players[1].hand.size}  second player hand size after first played card")
@@ -107,11 +106,12 @@ class PlayerActionService(private val rootService: RootService) :
                 game.playStack.add(card)
                 currentPlayer.hand.remove(card)
                 currentPlayer.collectionStack.addAll(game.playStack)
-                println(currentPlayer.collectionStack)
 
                 isTrio = true
                 currentPlayer.score += 5
                 currentPlayer.hasPlayed = true
+                game.players[0].hasSpecialAction = true
+                game.players[1].hasSpecialAction = true
 
                 println("${game.players[0].hand.size}  first player hand size after first played card")
                 println("${game.players[1].hand.size}  second player hand size after first played card")
@@ -125,12 +125,14 @@ class PlayerActionService(private val rootService: RootService) :
                 game.playStack.add(card)
                 currentPlayer.hand.remove(card)
                 currentPlayer.collectionStack.addAll(game.playStack)
-                println(currentPlayer.collectionStack)
 
                 isTrio = true
                 currentPlayer.score += 20
 
                 currentPlayer.hasPlayed = true
+
+                game.players[0].hasSpecialAction = true
+                game.players[1].hasSpecialAction = true
 
                 println("${game.players[0].hand.size}  first player hand size after first played card")
                 println("${game.players[1].hand.size}  second player hand size after first played card")
@@ -174,19 +176,12 @@ class PlayerActionService(private val rootService: RootService) :
                     else game.players[1]
 
                 if (!currentPlayer.hasPlayed) {
-                    println(game.drawStack.size)
-                    println("*****")
                     val drawnCard = game.drawStack.removeLast()
-                    println(game.drawStack.size)
 
-                    /* currentPlayer.hand.add(drawnCard)
-                currentPlayer.lastDrawnCard = drawnCard
-
-                */
                     currentPlayer.lastDrawnCard = drawnCard
                     currentPlayer.hand.add(currentPlayer.lastDrawnCard!!)
 
-                    println("${currentPlayer.hand.size}")
+
                 } else {
                     println("${currentPlayer.name} played already. please use the end turn button")
                 }
@@ -223,21 +218,20 @@ class PlayerActionService(private val rootService: RootService) :
         if (currentPlayer.hasSpecialAction) {
             if (game.playStack.all {
                     it.suit == cardTaken.suit || it.value == cardTaken.value
-                            && game.playStack.size in 1..2
+                            && (game.playStack.size in 1..2)
                 }) {
                 game.playStack.add(cardPlaced)
                 currentPlayer.hand.remove(cardPlaced)
                 currentPlayer.hand.add(cardTaken)
                 game.playStack.remove(cardTaken)
                 currentPlayer.hasSpecialAction = false
-                currentPlayer.hasPlayed
+                currentPlayer.hasPlayed = true
                 onAllRefreshables {
                     refreshAfterSwapCard()
                 }
             } else
                 throw IllegalArgumentException("Selected card is not valid")
         }
-
     }
 
 

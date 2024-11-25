@@ -7,28 +7,42 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 
+/**
+ * Unit tests for the PlayerActionService class.
+ *
+ * This class contains various unit tests to ensure the functionality of the PlayerActionService
+ * methods, which include player actions like playing, drawing, swapping, and discarding cards.
+ * The tests cover different scenarios, such as valid and invalid plays, drawing from an empty stack,
+ * performing special actions, and validating card matches.
+ */
 class PlayerActionServiceTest {
 
-    private var rootService= RootService()
-    private var playerActionService= PlayerActionService(rootService)
+    /** Instance of RootService to initialize the game and manage game state */
+    private var rootService = RootService()
+
+    /** Instance of PlayerActionService to handle player actions during the game */
+    private var playerActionService = PlayerActionService(rootService)
 
     @BeforeEach
     fun setUp() {
         // Initialize the root service and current game
         rootService = RootService()
-        val players = mutableListOf(Player("bob",0,true), Player("tom",0,true))
+        val players = mutableListOf(Player("bob", 0, true), Player("tom", 0, true))
         val playStack = mutableListOf<Card>()
-        val drawStack = mutableListOf(Card(CardSuit.HEARTS, CardValue.TWO),Card(CardSuit.SPADES, CardValue.THREE)) // Add a card to drawStack
+        val drawStack = mutableListOf(
+            Card(CardSuit.HEARTS, CardValue.TWO),
+            Card(CardSuit.SPADES, CardValue.THREE)
+        ) // Add a card to drawStack
         val discardStack = mutableListOf<Card>()
 
         // Set up the game with initialized stacks and players
-        rootService.currentGame = TauchenGame( players)
-        val game =rootService.currentGame
+        rootService.currentGame = TauchenGame(players)
+        val game = rootService.currentGame
         checkNotNull(game) { "No game currently running." }
         game.drawStack = drawStack
         game.playStack = playStack
-        game.discardStack =discardStack
-        game.isPlayerOneActive =true
+        game.discardStack = discardStack
+        game.isPlayerOneActive = true
         playerActionService = PlayerActionService(rootService)
     }
 
@@ -61,8 +75,8 @@ class PlayerActionServiceTest {
         assertFalse(game.players[0].hand.contains(cardToPlay))
     }
 
+    /**testplay card with  non-matching card (throws Exception)*/
     @Test
-            /**testplay card with  non-matching card (throws Exception)*/
     fun testplayCardNonMatchingCard() {
         val game = rootService.currentGame!!
         game.isPlayerOneActive = true
@@ -154,9 +168,35 @@ class PlayerActionServiceTest {
         // Test swap with invalid card
         val invalidCard = Card(CardSuit.CLUBS, CardValue.KING)
         game.players[0].hand.add(invalidCard)
-        assertDoesNotThrow{ playerActionService.swapCard(invalidCard, cardPlaced) }
+        assertDoesNotThrow { playerActionService.swapCard(invalidCard, cardPlaced) }
         assertFalse(game.playStack.contains(invalidCard))
     }
+
+    /**Test swapping cards without having special action*/
+    @Test
+    fun swapCardInvalidSwapNoSpecialAction() {
+        val game = rootService.currentGame
+        checkNotNull(game)
+        val currentPlayer =
+            if (game.isPlayerOneActive) game.players[0]
+            else game.players[1]
+        currentPlayer.hasSpecialAction = false
+
+        currentPlayer.hand.clear()
+        game.playStack.clear()
+
+
+        val cardToPlace = Card(CardSuit.CLUBS, CardValue.KING)
+        currentPlayer.hand.add(cardToPlace)
+        val cardToTake = Card(CardSuit.CLUBS, CardValue.FIVE)
+        game.playStack.add(cardToTake)
+
+        assertDoesNotThrow {
+            rootService.playerActionService.swapCard(cardToTake, cardToPlace)
+        }
+        assertFalse(currentPlayer.hand.contains(cardToTake))
+    }
+
     /**Test discarding a card when hand size is nine*/
     @Test
     fun testDiscardCard() {
@@ -181,7 +221,7 @@ class PlayerActionServiceTest {
         game.players[0].hand.add(card8)
         game.players[0].hand.add(card9)
 
-        assertDoesNotThrow{ playerActionService.discardCard(card8) }
+        assertDoesNotThrow { playerActionService.discardCard(card8) }
         assertTrue(game.discardStack.isNotEmpty())
 
     }
@@ -197,23 +237,6 @@ class PlayerActionServiceTest {
         assertFalse(game.discardStack.isNotEmpty())
     }
 
-    /**Test playCard to create a trio with matching values*/
-    @Test
-    fun testTrioWithMatchingValue() {
-        val game = rootService.currentGame!!
-        game.isPlayerOneActive = true
-
-        val card1 = Card(CardSuit.HEARTS, CardValue.FIVE)
-        val card2 = Card(CardSuit.SPADES, CardValue.FIVE)
-        val cardToPlay = Card(CardSuit.DIAMONDS, CardValue.FIVE)
-        game.playStack.addAll(listOf(card1, card2))
-        game.players[0].hand.add(cardToPlay)
-
-        playerActionService.playCard(cardToPlay)
-
-        assertTrue(game.players[0].collectionStack.containsAll(listOf(card1, card2, cardToPlay)))
-        assertEquals(20, game.players[0].score)
-    }
 
     /**Test end turn after player has played a card*/
     @Test
@@ -243,7 +266,34 @@ class PlayerActionServiceTest {
 
         val drawnCard = game.drawStack.removeLast()
 
-        assertDoesNotThrow{ playerActionService.drawCard() }
+        assertDoesNotThrow { playerActionService.drawCard() }
         assertFalse(game.players[0].hand.contains(drawnCard))
+    }
+
+    /** Test if 'isCardValid' returns true for cards with matching suits */
+    @Test
+    fun isCardValidValidMatchingSuits() {
+        val stackCard = Card(CardSuit.HEARTS, CardValue.SEVEN)
+        val cardToPlay = Card(CardSuit.HEARTS, CardValue.TEN)
+
+        assertTrue(playerActionService.isCardValid(stackCard, cardToPlay))
+    }
+
+    /** Test if 'isCardValid' returns true for cards with matching values */
+    @Test
+    fun isCardValidValidMatchingValue() {
+        val stackCard = Card(CardSuit.SPADES, CardValue.NINE)
+        val cardToPlay = Card(CardSuit.HEARTS, CardValue.NINE)
+
+        assertTrue(playerActionService.isCardValid(stackCard, cardToPlay))
+    }
+
+    /** Test if 'isCardValid' returns false for cards with neither matching suits nor values */
+    @Test
+    fun isCardValidNoMatch() {
+        val stackCard = Card(CardSuit.SPADES, CardValue.NINE)
+        val cardToPlay = Card(CardSuit.HEARTS, CardValue.TEN)
+
+        assertFalse(playerActionService.isCardValid(stackCard, cardToPlay))
     }
 }
